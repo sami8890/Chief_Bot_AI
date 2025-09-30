@@ -10,9 +10,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { UtensilsCrossed } from "@/components/icons";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 export default function SignInPage() {
     const router = useRouter();
@@ -21,16 +23,18 @@ export default function SignInPage() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSignIn = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
             toast({
                 title: "Signed In",
-                description: "You have successfully signed in.",
+                description: "Welcome back! You have successfully signed in.",
             });
             const userIsAdmin = email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
             if (userIsAdmin) {
@@ -45,20 +49,19 @@ export default function SignInPage() {
                 case 'auth/user-not-found':
                 case 'auth/wrong-password':
                 case 'auth/invalid-credential':
-                    errorMessage = "Invalid credentials. Please check your email and password.";
+                    errorMessage = "Invalid credentials. Please check your email and password and try again.";
                     break;
                 case 'auth/invalid-email':
-                    errorMessage = "Please enter a valid email address.";
+                    errorMessage = "The email address you entered is not valid. Please check and try again.";
                     break;
                 case 'auth/user-disabled':
-                    errorMessage = "This account has been disabled.";
+                    errorMessage = "This account has been disabled. Please contact support for assistance.";
+                    break;
+                 case 'auth/too-many-requests':
+                    errorMessage = "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.";
                     break;
             }
-            toast({
-                variant: "destructive",
-                title: "Sign In Failed",
-                description: errorMessage,
-            });
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -82,6 +85,13 @@ export default function SignInPage() {
                     </CardHeader>
                     <form onSubmit={handleSignIn}>
                         <CardContent className="space-y-4">
+                            {error && (
+                               <Alert variant="destructive">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <AlertTitle>Sign In Failed</AlertTitle>
+                                    <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />

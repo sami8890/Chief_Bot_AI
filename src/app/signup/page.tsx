@@ -11,9 +11,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { UtensilsCrossed } from "@/components/icons";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -23,10 +24,12 @@ export default function SignUpPage() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
 
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -46,28 +49,24 @@ export default function SignUpPage() {
             
             toast({
                 title: "Account Created",
-                description: "You have successfully signed up.",
+                description: "Welcome! Your account has been successfully created.",
             });
             router.push("/");
         } catch (error: any) {
             console.error("Sign up error:", error);
-             let errorMessage = "An unexpected error occurred. Please try again.";
+            let errorMessage = "An unexpected error occurred. Please try again.";
             switch (error.code) {
                 case 'auth/email-already-in-use':
-                    errorMessage = "This email address is already in use. Please sign in or use a different email.";
+                    errorMessage = "This email is already in use. Please try signing in instead.";
                     break;
                 case 'auth/invalid-email':
-                    errorMessage = "Please enter a valid email address.";
+                    errorMessage = "The email address you entered is not valid. Please check and try again.";
                     break;
                 case 'auth/weak-password':
                     errorMessage = "The password is too weak. It must be at least 6 characters long.";
                     break;
             }
-            toast({
-                variant: "destructive",
-                title: "Sign Up Failed",
-                description: errorMessage,
-            });
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -91,6 +90,13 @@ export default function SignUpPage() {
                     </CardHeader>
                     <form onSubmit={handleSignUp}>
                         <CardContent className="space-y-4">
+                             {error && (
+                                <Alert variant="destructive">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <AlertTitle>Sign Up Failed</AlertTitle>
+                                    <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
                             <div className="space-y-2">
                                 <Label htmlFor="name">Name</Label>
                                 <Input id="name" type="text" placeholder="John Doe" required value={name} onChange={(e) => setName(e.target.value)} />

@@ -9,19 +9,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { UtensilsCrossed } from "@/components/icons";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ForgotPasswordPage() {
     const { toast } = useToast();
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isSent, setIsSent] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
 
         try {
             await sendPasswordResetEmail(auth, email);
@@ -35,12 +38,10 @@ export default function ForgotPasswordPage() {
             let errorMessage = "An unexpected error occurred. Please try again.";
             if (error.code === 'auth/user-not-found') {
                 errorMessage = "No account found with that email address.";
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = "Please enter a valid email address."
             }
-            toast({
-                variant: "destructive",
-                title: "Reset Failed",
-                description: errorMessage,
-            });
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -70,6 +71,13 @@ export default function ForgotPasswordPage() {
                     {!isSent ? (
                         <form onSubmit={handleResetPassword}>
                             <CardContent className="space-y-4">
+                                {error && (
+                                    <Alert variant="destructive">
+                                        <AlertTriangle className="h-4 w-4" />
+                                        <AlertTitle>Reset Failed</AlertTitle>
+                                        <AlertDescription>{error}</AlertDescription>
+                                    </Alert>
+                                )}
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
                                     <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
