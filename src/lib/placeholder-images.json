@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "bruschetta",
+      "description": "Close-up of three pieces of bruschetta on a wooden board.",
+      "imageUrl": "https://images.unsplash.com/photo-1630230596944-6373069c837d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxicnVzY2hldHRhJTIwdG9tYXRvZXN8ZW58MHx8fHwxNzU5MTUwMDA3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bruschetta tomatoes"
+    },
+    {
+      "id": "quinoa-salad",
+      "description": "A colorful quinoa salad in a white bowl, with fresh vegetables.",
+      "imageUrl": "https://images.unsplash.com/photo-1623428188495-89c064ee061a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxxdWlub2ElMjBzYWxhZHxlbnwwfHx8fDE3NTkwOTM3NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "quinoa salad"
+    },
+    {
+      "id": "lentil-soup",
+      "description": "A bowl of red lentil soup, garnished with fresh herbs.",
+      "imageUrl": "https://images.unsplash.com/photo-1605909388460-74ec8b204127?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxsZW50aWwlMjBzb3VwfGVufDB8fHx8MTc1OTE1NjkyNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "lentil soup"
+    },
+    {
+      "id": "mushroom-risotto",
+      "description": "Creamy mushroom risotto in a rustic plate, topped with parmesan.",
+      "imageUrl": "https://images.unsplash.com/photo-1595908129746-57ca1a63dd4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtdXNocm9vbSUyMHJpc290dG98ZW58MHx8fHwxNzU5MTg4MzU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mushroom risotto"
+    },
+    {
+      "id": "paella",
+      "description": "A large pan of traditional Spanish paella with seafood and chicken.",
+      "imageUrl": "https://images.unsplash.com/photo-1746587293135-7a59f5764cd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzZWFmb29kJTIwcGFlbGxhfGVufDB8fHx8MTc1OTE0NDMwMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "seafood paella"
+    },
+    {
+      "id": "ribeye-steak",
+      "description": "A perfectly grilled ribeye steak sliced on a cutting board.",
+      "imageUrl": "https://images.unsplash.com/photo-1657143378324-83c1609f32a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Z3JpbGxlZCUyMHN0ZWFrfGVufDB8fHx8MTc1OTE2NjQ4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "grilled steak"
+    },
+    {
+      "id": "lava-cake",
+      "description": "A chocolate lava cake with a molten center and a scoop of ice cream.",
+      "imageUrl": "https://images.unsplash.com/photo-1517427294546-5aa121f68e8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaG9jb2xhdGUlMjBjYWtlfGVufDB8fHx8MTc1OTEzNzc5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "chocolate cake"
+    },
+    {
+      "id": "avocado-toast",
+      "description": "Avocado toast on a plate, topped with seeds and spices.",
+      "imageUrl": "https://images.unsplash.com/photo-1650092194571-d3c1534562be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhdm9jYWRvJTIwdG9hc3R8ZW58MHx8fHwxNzU5MTY1MzE1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "avocado toast"
+    }
+  ]
 }
