@@ -1,9 +1,7 @@
 
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
-import { useRouter } from 'next/navigation';
-import { Home, Utensils, Users, ShoppingCart, Loader2 } from 'lucide-react';
+import { Utensils, Users, ShoppingCart, Loader2, Home } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -14,6 +12,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { UtensilsCrossed } from '@/components/icons';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: Home },
@@ -27,32 +27,12 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-
-  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user || !isAdmin) {
-    router.replace('/signin');
-    return (
-        <div className="flex h-screen items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <p className="ml-2">Redirecting...</p>
-        </div>
-    );
-  }
 
   const handleSignOut = async () => {
     await signOut(auth);
-    router.push('/signin');
+    router.push('/');
   }
 
   return (
@@ -72,18 +52,20 @@ export default function AdminLayout({
                 ))}
             </nav>
           </div>
-          <div className="mt-auto p-4 border-t">
-              <div className="flex items-center gap-2">
-                  <Avatar>
-                      <AvatarFallback>{user.displayName?.[0] || user.email?.[0].toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                      <span className="font-semibold">{user.displayName || 'Admin'}</span>
-                      <span className="text-xs text-muted-foreground">{user.email}</span>
-                  </div>
-                  <Button variant="ghost" size="sm" className="ml-auto" onClick={handleSignOut}>Sign Out</Button>
-              </div>
-          </div>
+           {user && (
+            <div className="mt-auto p-4 border-t">
+                <div className="flex items-center gap-2">
+                    <Avatar>
+                        <AvatarFallback>{user.displayName?.[0] || user.email?.[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                        <span className="font-semibold">{user.displayName || 'Admin'}</span>
+                        <span className="text-xs text-muted-foreground">{user.email}</span>
+                    </div>
+                    <Button variant="ghost" size="sm" className="ml-auto" onClick={handleSignOut}>Sign Out</Button>
+                </div>
+            </div>
+           )}
         </div>
       </div>
       <div className="flex flex-col">
