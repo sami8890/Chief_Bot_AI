@@ -1,4 +1,3 @@
-
 "use client";
 
 import { UtensilsCrossed } from 'lucide-react';
@@ -30,7 +29,7 @@ export function Header() {
             <>
               {user ? (
                 <>
-                  <span className="text-sm text-muted-foreground hidden sm:inline">Welcome, {user.email}</span>
+                  <span className="text-sm text-muted-foreground hidden sm:inline">Welcome, {user.displayName || user.email}</span>
                   <Button variant="ghost" onClick={handleSignOut}>Sign Out</Button>
                 </>
               ) : (
