@@ -71,7 +71,7 @@ export default function SignUpPage() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.targe.value)} />
+                                <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
