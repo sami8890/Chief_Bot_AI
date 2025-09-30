@@ -2,8 +2,10 @@ import { Header } from '@/components/layout/header';
 import { Hero } from '@/components/hero';
 import { RestaurantInfo } from '@/components/restaurant-info';
 import { MenuWrapper } from '@/components/menu/menu-wrapper';
-import { menuItems, restaurantInfo, dietaryOptions } from '@/lib/data';
+import { menuItems, restaurantInfo, dietaryOptions, testimonials, galleryImageIds } from '@/lib/data';
 import { Footer } from '@/components/layout/footer';
+import { Testimonials } from '@/components/testimonials';
+import { Gallery } from '@/components/gallery';
 
 export default function Home() {
   return (
@@ -12,7 +14,12 @@ export default function Home() {
       <Hero />
       <main id="main-content" className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <RestaurantInfo info={restaurantInfo} />
+        <div className="my-16" />
         <MenuWrapper menuItems={menuItems} dietaryOptions={dietaryOptions} />
+        <div className="my-16" />
+        <Testimonials testimonials={testimonials} />
+        <div className="my-16" />
+        <Gallery imageIds={galleryImageIds} />
       </main>
       <Footer />
     </div>

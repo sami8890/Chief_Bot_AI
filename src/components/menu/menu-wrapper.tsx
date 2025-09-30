@@ -40,6 +40,10 @@ export function MenuWrapper({ menuItems, dietaryOptions }: { menuItems: MenuItem
 
   return (
     <section id="menu">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-headline">Our Menu</h2>
+          <p className="text-muted-foreground mt-2">Explore our curated selection of exquisite dishes.</p>
+        </div>
         <div className="mb-8 p-6 rounded-lg border bg-card text-card-foreground shadow-sm">
             <PersonalizedRecommendations menu={menuAsString} />
         </div>
