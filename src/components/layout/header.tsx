@@ -1,6 +1,7 @@
+
 "use client";
 
-import { UtensilsCrossed, Menu as MenuIcon, X, ShoppingCart, Shield } from 'lucide-react';
+import { UtensilsCrossed, Menu as MenuIcon, X, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';

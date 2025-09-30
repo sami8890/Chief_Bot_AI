@@ -13,6 +13,7 @@ import { Menu as MenuIcon } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { UtensilsCrossed } from '@/components/icons';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: Home },
@@ -29,6 +30,8 @@ export default function AdminLayout({
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
+  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -37,7 +40,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!user || user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+  if (!user || !isAdmin) {
     router.replace('/signin');
     return (
         <div className="flex h-screen items-center justify-center">
@@ -129,15 +132,5 @@ function NavItem({ href, label, icon: Icon }: {href: string, label: string, icon
             <Icon className="h-4 w-4" />
             {label}
         </Link>
-    )
-}
-
-function UtensilsCrossed(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l8 8"/>
-            <path d="M16 16l-2.5 2.5a3.5 3.5 0 0 1-5 0l-4.5-4.5a3.5 3.5 0 0 1 0-5L6.5 6.5"/>
-            <path d="m2 6 8 8"/>
-        </svg>
     )
 }
