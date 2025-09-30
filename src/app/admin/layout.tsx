@@ -37,7 +37,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!user || user.email !== process.env.ADMIN_EMAIL) {
+  if (!user || user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
     router.replace('/signin');
     return (
         <div className="flex h-screen items-center justify-center">
