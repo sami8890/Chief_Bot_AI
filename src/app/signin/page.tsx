@@ -32,7 +32,12 @@ export default function SignInPage() {
                 title: "Signed In",
                 description: "You have successfully signed in.",
             });
-            router.push("/");
+            const userIsAdmin = email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+            if (userIsAdmin) {
+                router.push("/admin");
+            } else {
+                router.push("/");
+            }
         } catch (error: any) {
             console.error("Sign in error:", error);
             toast({
@@ -68,7 +73,12 @@ export default function SignInPage() {
                                 <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="password">Password</Label>
+                                    <Link href="/forgot-password" passHref>
+                                       <Button variant="link" className="px-0 h-auto text-xs">Forgot Password?</Button>
+                                    </Link>
+                                </div>
                                 <div className="relative">
                                     <Input 
                                         id="password" 
