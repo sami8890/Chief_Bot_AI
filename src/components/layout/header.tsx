@@ -1,6 +1,6 @@
 "use client";
 
-import { UtensilsCrossed, Menu as MenuIcon, X, ShoppingCart } from 'lucide-react';
+import { UtensilsCrossed, Menu as MenuIcon, X, ShoppingCart, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
@@ -30,6 +30,8 @@ export function Header() {
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
   const handleSignOut = async () => {
     await signOut(auth);
     setIsMobileMenuOpen(false);
@@ -49,6 +51,7 @@ export function Header() {
       <NavLink href="/#menu" onClick={() => setIsMobileMenuOpen(false)}>Menu</NavLink>
       <NavLink href="/#testimonials" onClick={() => setIsMobileMenuOpen(false)}>Testimonials</NavLink>
       <NavLink href="/#gallery" onClick={() => setIsMobileMenuOpen(false)}>Gallery</NavLink>
+      {isAdmin && <NavLink href="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin</NavLink>}
     </>
   );
 
