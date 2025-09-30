@@ -26,8 +26,8 @@ export function Hero() {
         <p className="text-lg md:text-xl max-w-3xl mx-auto" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.7)' }}>
           Discover a symphony of flavors crafted with passion and the finest ingredients.
         </p>
-        <Button size="lg" className="mt-8 bg-white/10 border-white border text-white backdrop-blur-sm hover:bg-white/20 transition-all duration-300" asChild>
-          <Link href="/#menu">Explore The Menu</Link>
+        <Button size="lg" className="mt-8" asChild>
+          <Link href="/#main-content">Explore The Menu</Link>
         </Button>
       </div>
     </section>
