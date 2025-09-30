@@ -1,3 +1,4 @@
+
 export type MenuItem = {
   id: number;
   name: string;
@@ -7,6 +8,27 @@ export type MenuItem = {
   dietaryTags: string[];
   imageId: string;
 };
+
+export type CartItem = MenuItem & {
+  quantity: number;
+};
+
+export type Order = {
+  id: number;
+  customerName: string;
+  date: string;
+  total: number;
+  status: 'Pending' | 'Confirmed' | 'Delivered' | 'Cancelled';
+  items: CartItem[];
+  orderType: 'pickup' | 'delivery';
+};
+
+export type Customer = {
+    id: number;
+    name: string;
+    email: string;
+    joinedDate: string;
+}
 
 export type RestaurantInfoType = {
   name: string;
@@ -186,3 +208,63 @@ export const galleryImageIds: string[] = [
   'gallery-5',
   'gallery-6',
 ];
+
+export const orders: Order[] = [
+    {
+        id: 1,
+        customerName: 'John Doe',
+        date: '2024-07-29',
+        total: 47.5,
+        status: 'Delivered',
+        orderType: 'delivery',
+        items: [
+            {...menuItems[0], quantity: 1},
+            {...menuItems[5], quantity: 1}
+        ]
+    },
+    {
+        id: 2,
+        customerName: 'Jane Smith',
+        date: '2024-07-29',
+        total: 37.0,
+        status: 'Confirmed',
+        orderType: 'pickup',
+        items: [
+             {...menuItems[3], quantity: 1},
+             {...menuItems[6], quantity: 1},
+        ]
+    },
+    {
+        id: 3,
+        customerName: 'Peter Jones',
+        date: '2024-07-30',
+        total: 24.0,
+        status: 'Pending',
+        orderType: 'pickup',
+        items: [
+             {...menuItems[1], quantity: 1},
+             {...menuItems[2], quantity: 1},
+        ]
+    },
+     {
+        id: 4,
+        customerName: 'Jessica Miller',
+        date: '2024-07-30',
+        total: 10.0,
+        status: 'Cancelled',
+        orderType: 'delivery',
+        items: [
+            {...menuItems[10], quantity: 1}
+        ]
+    }
+]
+
+export const customers: Customer[] = [
+    { id: 1, name: 'John Doe', email: 'john.d@example.com', joinedDate: '2023-01-15' },
+    { id: 2, name: 'Jane Smith', email: 'jane.s@example.com', joinedDate: '2023-02-20' },
+    { id: 3, name: 'Peter Jones', email: 'peter.j@example.com', joinedDate: '2023-03-10' },
+    { id: 4, name: 'Jessica Miller', email: 'jessica.m@example.com', joinedDate: '2023-04-05' },
+    { id: 5, name: 'David Chen', email: 'david.c@example.com', joinedDate: '2023-05-21' },
+    { id: 6, name: 'Sarah Jenkins', email: 'sarah.j@example.com', joinedDate: '2023-06-18' },
+    { id: 7, name: 'Sami Gabol', email: 'sami.gabol13@gamil.com', joinedDate: '2024-07-30' },
+]

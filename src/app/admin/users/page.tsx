@@ -1,5 +1,12 @@
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Users } from "lucide-react";
+
+'use client';
+
+import { customers } from '@/lib/data';
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 export default function UsersPage() {
   return (
@@ -9,16 +16,45 @@ export default function UsersPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Upcoming Feature</CardTitle>
+          <CardTitle>Registered Customers</CardTitle>
           <CardDescription>
-            This section will display all registered customers.
+            A list of all users who have created an account.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg">
-            <Users className="w-16 h-16 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">The customer management page is currently under construction.</p>
-          </div>
+           <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead className="hidden md:table-cell">Joined On</TableHead>
+                        <TableHead>Role</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {customers.map((customer) => (
+                        <TableRow key={customer.id}>
+                            <TableCell>
+                                <div className="flex items-center gap-3">
+                                    <Avatar>
+                                        <AvatarFallback>{customer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-medium">{customer.name}</span>
+                                </div>
+                            </TableCell>
+                            <TableCell>{customer.email}</TableCell>
+                            <TableCell className="hidden md:table-cell">{new Date(customer.joinedDate).toLocaleDateString()}</TableCell>
+                             <TableCell>
+                                {customer.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ? (
+                                    <Badge>Admin</Badge>
+                                ) : (
+                                    <Badge variant="secondary">Customer</Badge>
+                                )}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
         </CardContent>
       </Card>
     </div>
