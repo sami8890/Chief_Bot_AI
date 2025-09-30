@@ -9,6 +9,7 @@ import type { ComponentType } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
+import { MenuAnalyzer } from './menu-analyzer';
 
 const tagIconMap: { [key: string]: ComponentType<{ className?: string }> } = {
     vegetarian: Leaf,
@@ -54,7 +55,10 @@ export function MenuCard({ item }: { item: MenuItem }) {
         </div>
       )}
       <CardHeader>
-        <CardTitle className="font-headline">{item.name}</CardTitle>
+        <div className="flex justify-between items-start">
+          <CardTitle className="font-headline">{item.name}</CardTitle>
+          <MenuAnalyzer menuItemDescription={item.description} />
+        </div>
       </CardHeader>
       <CardContent className="flex-1">
         <p className="text-muted-foreground mb-4">{item.description}</p>
