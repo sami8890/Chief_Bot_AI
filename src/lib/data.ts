@@ -45,6 +45,8 @@ export const dietaryOptions: string[] = [
   'dairy-free',
 ];
 
+export const categories = ['Appetizers', 'Salads', 'Soups', 'Main Courses', 'Desserts'];
+
 export const menuItems: MenuItem[] = [
   {
     id: 1,
