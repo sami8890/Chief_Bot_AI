@@ -6,7 +6,7 @@ export function Hero() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-image');
 
   return (
-    <section id="hero" className="relative h-[60vh] min-h-[400px] max-h-[600px] w-full flex items-center justify-center text-center text-white overflow-hidden">
+    <section id="hero" className="relative h-[70vh] min-h-[500px] max-h-[700px] w-full flex items-center justify-center text-center text-white overflow-hidden">
       {heroImage && (
         <Image
           src={heroImage.imageUrl}
@@ -17,15 +17,15 @@ export function Hero() {
           priority
         />
       )}
-      <div className="absolute inset-0 bg-black/50" />
-      <div className="relative z-10 p-4">
-        <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-shadow-lg mb-4 font-headline">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent" />
+      <div className="relative z-10 p-4 animate-fade-in-up">
+        <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 font-headline" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
           Experience Culinary Excellence
         </h2>
-        <p className="text-lg md:text-xl max-w-2xl mx-auto text-shadow">
+        <p className="text-lg md:text-xl max-w-3xl mx-auto" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.7)' }}>
           Discover a symphony of flavors crafted with passion and the finest ingredients.
         </p>
-        <Button size="lg" className="mt-8" asChild>
+        <Button size="lg" className="mt-8 bg-white/10 border-white border text-white backdrop-blur-sm hover:bg-white/20 transition-all duration-300" asChild>
           <a href="#menu">Explore The Menu</a>
         </Button>
       </div>
