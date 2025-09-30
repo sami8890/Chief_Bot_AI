@@ -61,6 +61,8 @@ function CheckoutForm() {
       orderType: "pickup",
       paymentMethod: "card",
       fullName: user?.displayName || "",
+      phone: "",
+      address: "",
     },
   });
   
