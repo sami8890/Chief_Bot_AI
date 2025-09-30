@@ -14,13 +14,13 @@ export default function Home() {
       <main className="flex-1">
         <Hero />
         <div id="main-content" className="container mx-auto px-4 py-8 md:py-12">
-          <RestaurantInfo info={restaurantInfo} />
-          <div className="my-16" />
           <MenuWrapper menuItems={menuItems} dietaryOptions={dietaryOptions} />
           <div className="my-16" />
           <Testimonials testimonials={testimonials} />
           <div className="my-16" />
           <Gallery imageIds={galleryImageIds} />
+          <div className="my-16" />
+          <RestaurantInfo info={restaurantInfo} />
         </div>
       </main>
       <Footer />
