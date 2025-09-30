@@ -1,4 +1,5 @@
 import { UtensilsCrossed } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function Header() {
   return (
@@ -8,6 +9,10 @@ export function Header() {
         <h1 className="text-2xl font-bold font-headline tracking-tight text-foreground">
           GastronomicAI
         </h1>
+        <div className="ml-auto flex items-center gap-4">
+          <Button variant="ghost">Sign In</Button>
+          <Button>Sign Up</Button>
+        </div>
       </div>
     </header>
   );
