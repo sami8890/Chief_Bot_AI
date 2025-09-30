@@ -31,7 +31,7 @@ const checkoutSchema = z.object({
   paymentMethod: z.enum(["card", "cod"]),
 }).refine(data => {
   if (data.orderType === 'delivery') {
-    return data.address && data.address.length > 0;
+    return data.address && data.address.trim().length > 0;
   }
   return true;
 }, {
@@ -76,7 +76,8 @@ function CheckoutForm() {
       // Handle Cash on Delivery
       console.log("Placing order with Cash on Delivery", data);
       clearCart();
-      router.push(`/payment/success?amount=${total}&name=${data.fullName}&orderType=${data.orderType}`);
+      const successUrl = `/payment/success?amount=${total}&name=${data.fullName}&orderType=${data.orderType}${data.address ? `&address=${encodeURIComponent(data.address)}` : ''}`;
+      router.push(successUrl);
       return;
     }
 
@@ -89,7 +90,7 @@ function CheckoutForm() {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/payment/success?amount=${total}&name=${data.fullName}&orderType=${data.orderType}`,
+        return_url: `${window.location.origin}/payment/success?amount=${total}&name=${data.fullName}&orderType=${data.orderType}${data.address ? `&address=${encodeURIComponent(data.address)}` : ''}`,
         payment_method_data: {
           billing_details: {
             name: data.fullName,
@@ -322,5 +323,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    

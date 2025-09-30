@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Home, Package } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 
 export default function PaymentSuccessPage() {
@@ -17,6 +17,7 @@ export default function PaymentSuccessPage() {
   const amount = searchParams.get('amount');
   const name = searchParams.get('name');
   const orderType = searchParams.get('orderType');
+  const address = searchParams.get('address');
 
   // Clear cart on component mount
   useEffect(() => {
@@ -45,10 +46,19 @@ export default function PaymentSuccessPage() {
                   <span className="text-muted-foreground">Order Total:</span>
                   <span className="font-bold text-lg">${amount ? parseFloat(amount).toFixed(2) : '0.00'}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Order Type:</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    {orderType === 'delivery' ? <Home className="w-4 h-4"/> : <Package className="w-4 h-4"/>}
+                    Order Type:
+                  </span>
                   <span className="font-medium capitalize">{orderType || 'N/A'}</span>
                 </div>
+                {orderType === 'delivery' && address && (
+                   <div className="flex justify-between items-start">
+                     <span className="text-muted-foreground">Delivery Address:</span>
+                     <span className="font-medium text-right max-w-[70%]">{decodeURIComponent(address)}</span>
+                   </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Estimated Time:</span>
                   <span className="font-medium">{orderType === 'delivery' ? '30-45 minutes' : '15-20 minutes'}</span>
