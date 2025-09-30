@@ -51,10 +51,22 @@ export default function SignUpPage() {
             router.push("/");
         } catch (error: any) {
             console.error("Sign up error:", error);
+             let errorMessage = "An unexpected error occurred. Please try again.";
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    errorMessage = "This email address is already in use. Please sign in or use a different email.";
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = "Please enter a valid email address.";
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = "The password is too weak. It must be at least 6 characters long.";
+                    break;
+            }
             toast({
                 variant: "destructive",
                 title: "Sign Up Failed",
-                description: error.message || "An unexpected error occurred.",
+                description: errorMessage,
             });
         } finally {
             setIsLoading(false);

@@ -40,10 +40,24 @@ export default function SignInPage() {
             }
         } catch (error: any) {
             console.error("Sign in error:", error);
+            let errorMessage = "An unexpected error occurred. Please try again.";
+            switch (error.code) {
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                case 'auth/invalid-credential':
+                    errorMessage = "Invalid credentials. Please check your email and password.";
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = "Please enter a valid email address.";
+                    break;
+                case 'auth/user-disabled':
+                    errorMessage = "This account has been disabled.";
+                    break;
+            }
             toast({
                 variant: "destructive",
                 title: "Sign In Failed",
-                description: error.message || "An unexpected error occurred.",
+                description: errorMessage,
             });
         } finally {
             setIsLoading(false);
