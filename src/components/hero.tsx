@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import Link from 'next/link';
 
 export function Hero() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-image');
@@ -26,7 +27,7 @@ export function Hero() {
           Discover a symphony of flavors crafted with passion and the finest ingredients.
         </p>
         <Button size="lg" className="mt-8 bg-white/10 border-white border text-white backdrop-blur-sm hover:bg-white/20 transition-all duration-300" asChild>
-          <a href="#menu">Explore The Menu</a>
+          <Link href="/#menu">Explore The Menu</Link>
         </Button>
       </div>
     </section>
