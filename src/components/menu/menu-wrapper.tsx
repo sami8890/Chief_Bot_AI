@@ -39,7 +39,7 @@ export function MenuWrapper({ menuItems, dietaryOptions }: { menuItems: MenuItem
   }, [menuItems]);
 
   return (
-    <section>
+    <section id="menu">
         <div className="mb-8 p-6 rounded-lg border bg-card text-card-foreground shadow-sm">
             <PersonalizedRecommendations menu={menuAsString} />
         </div>

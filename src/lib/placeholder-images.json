@@ -1,6 +1,12 @@
 {
   "placeholderImages": [
     {
+      "id": "hero-image",
+      "description": "A beautiful restaurant interior with warm lighting.",
+      "imageUrl": "https://images.unsplash.com/photo-1538333581680-29dd4752ddf2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzU5MTQwMTU2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "restaurant interior"
+    },
+    {
       "id": "bruschetta",
       "description": "Close-up of three pieces of bruschetta on a wooden board.",
       "imageUrl": "https://images.unsplash.com/photo-1630230596944-6373069c837d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxicnVzY2hldHRhJTIwdG9tYXRvZXN8ZW58MHx8fHwxNzU5MTUwMDA3fDA&ixlib=rb-4.1.0&q=80&w=1080",
