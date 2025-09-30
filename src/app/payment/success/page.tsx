@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { PartyPopper, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 
 export default function PaymentSuccessPage() {
@@ -68,3 +68,5 @@ export default function PaymentSuccessPage() {
     </div>
   );
 }
+
+    

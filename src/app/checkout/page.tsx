@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,11 +14,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Loader2, AlertTriangle, PartyPopper } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { createPaymentIntent } from "./actions";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -47,7 +48,6 @@ function CheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
   
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -67,19 +67,6 @@ function CheckoutForm() {
   const orderType = form.watch("orderType");
   const paymentMethod = form.watch("paymentMethod");
 
-  useEffect(() => {
-    if (user && cart.length > 0 && paymentMethod === 'card' && !clientSecret) {
-      createPaymentIntent(total)
-        .then(secret => {
-          setClientSecret(secret);
-        })
-        .catch(err => {
-          console.error("Failed to create payment intent", err);
-          setMessage("Could not initialize payment. Please refresh and try again.");
-        });
-    }
-  }, [user, cart, total, clientSecret, paymentMethod]);
-
 
   async function onSubmit(data: CheckoutFormValues) {
     setIsLoading(true);
@@ -93,7 +80,7 @@ function CheckoutForm() {
       return;
     }
 
-    if (!stripe || !elements || !clientSecret) {
+    if (!stripe || !elements) {
       setMessage("Payment system is not ready. Please wait a moment and try again.");
       setIsLoading(false);
       return;
@@ -102,7 +89,7 @@ function CheckoutForm() {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/payment/success`,
+        return_url: `${window.location.origin}/payment/success?amount=${total}&name=${data.fullName}&orderType=${data.orderType}`,
         payment_method_data: {
           billing_details: {
             name: data.fullName,
@@ -110,10 +97,6 @@ function CheckoutForm() {
           }
         }
       },
-      // This redirect is handled automatically by Stripe.js
-      // and the return_url is where the user will land.
-      // We can pass extra query params for the success page here.
-      redirect: 'if_required',
     });
 
     if (error) {
@@ -124,9 +107,7 @@ function CheckoutForm() {
       }
       setIsLoading(false);
     } else {
-      // Payment successful
       clearCart();
-      router.push(`/payment/success?amount=${total}&name=${data.fullName}&orderType=${data.orderType}`);
     }
   }
 
@@ -219,20 +200,14 @@ function CheckoutForm() {
                 )}
               />
 
-              {paymentMethod === 'card' && clientSecret && (
+              {paymentMethod === 'card' && (
                 <div className="p-4 border rounded-md bg-muted/20">
                   <Label className="text-sm font-medium mb-2 block">Card Details</Label>
                   <PaymentElement />
                 </div>
               )}
-              
-              {paymentMethod === 'card' && !clientSecret && (
-                  <div className="flex items-center justify-center p-8">
-                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                  </div>
-              )}
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading || (paymentMethod === 'card' && (!stripe || !clientSecret))}>
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading || (paymentMethod === 'card' && !stripe)}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Processing...' : `Confirm Order - $${total.toFixed(2)}`}
               </Button>
@@ -284,7 +259,7 @@ export default function CheckoutPage() {
   const { cart } = useCart();
   const router = useRouter();
 
-  const [options, setOptions] = useState<StripeElementsOptions | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.08;
@@ -301,19 +276,16 @@ export default function CheckoutPage() {
   }, [user, isAuthLoading, cart, router]);
 
   useEffect(() => {
-    if (cart.length > 0) {
+    if (cart.length > 0 && !clientSecret) {
       createPaymentIntent(total)
-        .then(clientSecret => {
-          setOptions({
-            clientSecret,
-            appearance: {
-              theme: 'night',
-              labels: 'floating',
-            },
-          });
+        .then(secret => {
+          setClientSecret(secret);
+        })
+        .catch(err => {
+            console.error("Failed to create payment intent", err);
         });
     }
-  }, [cart, total]);
+  }, [cart, total, clientSecret]);
   
   if (isAuthLoading || !user || cart.length === 0) {
     return (
@@ -322,18 +294,25 @@ export default function CheckoutPage() {
         </div>
     )
   }
+  
+  const options: StripeElementsOptions = {
+    clientSecret: clientSecret || undefined,
+    appearance: {
+        theme: 'night',
+        labels: 'floating',
+    },
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl font-headline mb-8">Checkout</h1>
-        {options && (
+        {clientSecret ? (
           <Elements stripe={stripePromise} options={options}>
             <CheckoutForm />
           </Elements>
-        )}
-        {!options && (
+        ) : (
            <div className="flex items-center justify-center p-8">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
            </div>
@@ -343,3 +322,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    
