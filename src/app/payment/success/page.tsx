@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -14,6 +15,7 @@ export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   
+  const orderId = searchParams.get('orderId');
   const amount = searchParams.get('amount');
   const name = searchParams.get('name');
   const orderType = searchParams.get('orderType');
@@ -42,6 +44,10 @@ export default function PaymentSuccessPage() {
             <div className="text-left bg-muted/50 p-4 rounded-md border">
               <h3 className="font-semibold mb-3">Order Summary</h3>
               <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                    <span className="text-muted-foreground">Order ID:</span>
+                    <span className="font-mono text-xs">#{orderId ? orderId.substring(0,7) : 'N/A'}...</span>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Order Total:</span>
                   <span className="font-bold text-lg">${amount ? parseFloat(amount).toFixed(2) : '0.00'}</span>

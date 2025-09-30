@@ -4,7 +4,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,8 +30,18 @@ export default function SignUpPage() {
 
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await updateProfile(userCredential.user, {
+            const user = userCredential.user;
+            
+            // Update the user's profile
+            await updateProfile(user, {
                 displayName: name,
+            });
+
+            // Save user data to Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                name: name,
+                email: email,
+                joinedDate: new Date().toISOString(),
             });
             
             toast({

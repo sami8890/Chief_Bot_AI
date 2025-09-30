@@ -1,13 +1,15 @@
 
 'use client';
 
-import { useState } from 'react';
-import { orders as initialOrders, type Order } from '@/lib/data';
+import { useState, useEffect } from 'react';
+import { type Order } from '@/lib/data';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,15 +31,43 @@ const statusColors: { [key: string]: string } = {
 const orderStatuses = ['Pending', 'Confirmed', 'Delivered', 'Cancelled'] as const;
 
 export default function OrdersPage() {
-    const [orders, setOrders] = useState<Order[]>(initialOrders);
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
 
-    const updateOrderStatus = (orderId: number, status: Order['status']) => {
-        setOrders(prevOrders => prevOrders.map(order => order.id === orderId ? { ...order, status } : order));
-        toast({
-            title: "Order Updated",
-            description: `Order #${orderId} has been marked as ${status}.`
-        })
+    useEffect(() => {
+        const ordersRef = collection(db, "orders");
+        const unsubscribe = onSnapshot(ordersRef, (snapshot) => {
+            const fetchedOrders: Order[] = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...(doc.data() as Omit<Order, 'id'>)
+            }));
+            // Sort orders by date, most recent first
+            fetchedOrders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            setOrders(fetchedOrders);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching orders:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch orders.'});
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [toast]);
+
+
+    const updateOrderStatus = async (orderId: string, status: Order['status']) => {
+        const orderRef = doc(db, "orders", orderId);
+        try {
+            await updateDoc(orderRef, { status });
+            toast({
+                title: "Order Updated",
+                description: `Order #${orderId.substring(0,6)}... has been marked as ${status}.`
+            })
+        } catch (error) {
+            console.error("Error updating order status:", error);
+             toast({ variant: 'destructive', title: 'Error', description: 'Failed to update order status.'});
+        }
     }
 
   return (
@@ -53,55 +83,62 @@ export default function OrdersPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Order ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead className="hidden md:table-cell">Date</TableHead>
-                        <TableHead>Total</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Items</TableHead>
-                        <TableHead><span className="sr-only">Actions</span></TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {orders.map((order) => (
-                        <TableRow key={order.id}>
-                            <TableCell className="font-medium">#{order.id}</TableCell>
-                            <TableCell>{order.customerName}</TableCell>
-                            <TableCell className="hidden md:table-cell">{new Date(order.date).toLocaleDateString()}</TableCell>
-                            <TableCell>${order.total.toFixed(2)}</TableCell>
-                            <TableCell>
-                                <Badge variant="outline" className={cn("capitalize border", statusColors[order.status])}>
-                                    {order.status}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                {order.items.reduce((acc, item) => acc + item.quantity, 0)}
-                            </TableCell>
-                            <TableCell>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                            <span className="sr-only">Toggle menu</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Update Status</DropdownMenuLabel>
-                                        {orderStatuses.map(status => (
-                                            <DropdownMenuItem key={status} onClick={() => updateOrderStatus(order.id, status)}>
-                                                {status}
-                                            </DropdownMenuItem>
-                                        ))}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </TableCell>
+             {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                </div>
+            ) : (
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Order ID</TableHead>
+                            <TableHead>Customer</TableHead>
+                            <TableHead className="hidden md:table-cell">Date</TableHead>
+                            <TableHead>Total</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Items</TableHead>
+                            <TableHead><span className="sr-only">Actions</span></TableHead>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {orders.map((order) => (
+                            <TableRow key={order.id}>
+                                <TableCell className="font-medium">#{order.id.substring(0, 6)}...</TableCell>
+                                <TableCell>{order.customerName}</TableCell>
+                                <TableCell className="hidden md:table-cell">{new Date(order.date).toLocaleDateString()}</TableCell>
+                                <TableCell>${order.total.toFixed(2)}</TableCell>
+                                <TableCell>
+                                    <Badge variant="outline" className={cn("capitalize border", statusColors[order.status])}>
+                                        {order.status}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    {order.items.reduce((acc, item) => acc + item.quantity, 0)}
+                                </TableCell>
+                                <TableCell>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                                <span className="sr-only">Toggle menu</span>
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+                                            {orderStatuses.map(status => (
+                                                <DropdownMenuItem key={status} onClick={() => updateOrderStatus(order.id, status)}>
+                                                    {status}
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            )}
+            { !isLoading && orders.length === 0 && <p className="text-center text-muted-foreground p-8">No orders have been placed yet.</p>}
         </CardContent>
       </Card>
     </div>

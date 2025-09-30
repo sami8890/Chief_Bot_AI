@@ -18,7 +18,7 @@ import { Footer } from "@/components/layout/footer";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { createPaymentIntent } from "./actions";
+import { createPaymentIntent, createOrder } from "./actions";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 
@@ -75,11 +75,34 @@ function CheckoutForm() {
     setIsLoading(true);
     setMessage(null);
 
+    if (!user) {
+        setMessage("You must be logged in to place an order.");
+        setIsLoading(false);
+        return;
+    }
+    
+    // Create the order in Firestore first
+    const orderResult = await createOrder(
+        { userId: user.uid, userName: data.fullName, userEmail: user.email! },
+        cart, 
+        total, 
+        data.orderType, 
+        data.address,
+        data.paymentMethod
+    );
+
+    if (!orderResult.success) {
+        setMessage(orderResult.error || "Failed to create order. Please try again.");
+        setIsLoading(false);
+        return;
+    }
+    
+    const successUrl = `/payment/success?orderId=${orderResult.orderId}&amount=${total}&name=${data.fullName}&orderType=${data.orderType}${data.address ? `&address=${encodeURIComponent(data.address)}` : ''}`;
+
     if (data.paymentMethod === 'cod') {
       // Handle Cash on Delivery
       console.log("Placing order with Cash on Delivery", data);
       clearCart();
-      const successUrl = `/payment/success?amount=${total}&name=${data.fullName}&orderType=${data.orderType}${data.address ? `&address=${encodeURIComponent(data.address)}` : ''}`;
       router.push(successUrl);
       return;
     }
@@ -93,7 +116,7 @@ function CheckoutForm() {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/payment/success?amount=${total}&name=${data.fullName}&orderType=${data.orderType}${data.address ? `&address=${encodeURIComponent(data.address)}` : ''}`,
+        return_url: `${window.location.origin}${successUrl}`,
         payment_method_data: {
           billing_details: {
             name: data.fullName,
@@ -280,7 +303,7 @@ export default function CheckoutPage() {
   }, [user, isAuthLoading, cart, router]);
 
   useEffect(() => {
-    if (cart.length > 0 && !clientSecret) {
+    if (cart.length > 0 && total > 0.50 && !clientSecret) { // Stripe requires a minimum amount
       createPaymentIntent(total)
         .then(secret => {
           setClientSecret(secret);
@@ -312,7 +335,7 @@ export default function CheckoutPage() {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl font-headline mb-8">Checkout</h1>
-        {clientSecret ? (
+        {(clientSecret || form.watch("paymentMethod") === 'cod') ? (
           <Elements stripe={stripePromise} options={options}>
             <CheckoutForm />
           </Elements>
