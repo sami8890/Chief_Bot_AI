@@ -1,7 +1,6 @@
-
 "use client";
 
-import { UtensilsCrossed, Menu as MenuIcon, X } from 'lucide-react';
+import { UtensilsCrossed, Menu as MenuIcon, X, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
@@ -11,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/context/cart-context';
+import { Badge } from '@/components/ui/badge';
 
 const NavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) => (
   <Link href={href} passHref>
@@ -22,9 +23,12 @@ const NavLink = ({ href, children, onClick }: { href: string; children: React.Re
 
 export function Header() {
   const { user, isLoading } = useAuth();
+  const { cart } = useCart();
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -83,15 +87,31 @@ export function Header() {
           </h1>
         </Link>
         
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-2 ml-auto">
           {navLinks}
           <div className="w-px h-6 bg-border mx-2" />
           {!isLoading && authLinks}
+           <Button variant="ghost" size="icon" asChild>
+            <Link href="/cart">
+              <ShoppingCart />
+              {cartItemCount > 0 && (
+                <Badge variant="destructive" className="absolute top-1 right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
+              )}
+              <span className="sr-only">Cart</span>
+            </Link>
+          </Button>
         </nav>
 
-        {/* Mobile Navigation */}
-        <div className="ml-auto md:hidden">
+        <div className="ml-auto md:hidden flex items-center">
+           <Button variant="ghost" size="icon" asChild>
+            <Link href="/cart">
+              <ShoppingCart />
+              {cartItemCount > 0 && (
+                <Badge variant="destructive" className="absolute top-1 right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
+              )}
+              <span className="sr-only">Cart</span>
+            </Link>
+          </Button>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">

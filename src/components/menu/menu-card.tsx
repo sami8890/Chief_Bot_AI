@@ -3,9 +3,12 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MenuAnalyzer } from './menu-analyzer';
-import { Leaf, Vegan, WheatOff, MilkOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Leaf, Vegan, WheatOff, MilkOff, ShoppingCart } from 'lucide-react';
 import type { ComponentType } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { useCart } from '@/context/cart-context';
+import { useToast } from '@/hooks/use-toast';
 
 const tagIconMap: { [key: string]: ComponentType<{ className?: string }> } = {
     vegetarian: Leaf,
@@ -16,6 +19,25 @@ const tagIconMap: { [key: string]: ComponentType<{ className?: string }> } = {
 
 export function MenuCard({ item }: { item: MenuItem }) {
   const placeholder = PlaceHolderImages.find(p => p.id === item.imageId);
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = () => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Required',
+        description: 'Please sign in to place your order.',
+      });
+      return;
+    }
+    addToCart(item);
+    toast({
+      title: 'Added to Cart',
+      description: `${item.name} has been added to your cart.`,
+    })
+  };
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
@@ -50,7 +72,10 @@ export function MenuCard({ item }: { item: MenuItem }) {
       </CardContent>
       <CardFooter className="flex justify-between items-center bg-muted/30 p-4">
         <span className="text-xl font-bold text-primary">${item.price.toFixed(2)}</span>
-        <MenuAnalyzer menuItemDescription={item.description} />
+        <Button onClick={handleAddToCart}>
+            <ShoppingCart className="mr-2"/>
+            Add to Cart
+        </Button>
       </CardFooter>
     </Card>
   );

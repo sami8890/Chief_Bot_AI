@@ -40,7 +40,7 @@ export function MenuAnalyzer({ menuItemDescription }: { menuItemDescription: str
   return (
     <Dialog onOpenChange={(open) => { if (open) handleAnalyze() }}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="ghost">
           <Sparkles className="mr-2 h-4 w-4" />
           Analyze
         </Button>
