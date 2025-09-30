@@ -91,11 +91,11 @@ export function Header() {
           {navLinks}
           <div className="w-px h-6 bg-border mx-2" />
           {!isLoading && authLinks}
-           <Button variant="ghost" size="icon" asChild>
+           <Button variant="ghost" size="icon" className="relative" asChild>
             <Link href="/cart">
               <ShoppingCart />
               {cartItemCount > 0 && (
-                <Badge variant="destructive" className="absolute top-1 right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
               )}
               <span className="sr-only">Cart</span>
             </Link>
@@ -103,11 +103,11 @@ export function Header() {
         </nav>
 
         <div className="ml-auto md:hidden flex items-center">
-           <Button variant="ghost" size="icon" asChild>
+           <Button variant="ghost" size="icon" className="relative" asChild>
             <Link href="/cart">
               <ShoppingCart />
               {cartItemCount > 0 && (
-                <Badge variant="destructive" className="absolute top-1 right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
               )}
               <span className="sr-only">Cart</span>
             </Link>
