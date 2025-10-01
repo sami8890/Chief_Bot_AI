@@ -42,7 +42,7 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
-function CheckoutForm() {
+function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
   const { user } = useAuth();
   const { cart, clearCart } = useCart();
   const router = useRouter();
@@ -69,6 +69,15 @@ function CheckoutForm() {
   
   const orderType = form.watch("orderType");
   const paymentMethod = form.watch("paymentMethod");
+
+  useEffect(() => {
+    if (paymentMethod === 'card' && !clientSecret) {
+      // This case is handled by the parent, but as a fallback
+      setMessage("Initializing payment... please wait.");
+    } else {
+      setMessage(null);
+    }
+  }, [paymentMethod, clientSecret])
 
 
   async function onSubmit(data: CheckoutFormValues) {
@@ -107,7 +116,7 @@ function CheckoutForm() {
       return;
     }
 
-    if (!stripe || !elements) {
+    if (!stripe || !elements || !clientSecret) {
       setMessage("Payment system is not ready. Please wait a moment and try again.");
       setIsLoading(false);
       return;
@@ -230,11 +239,11 @@ function CheckoutForm() {
               {paymentMethod === 'card' && (
                 <div className="p-4 border rounded-md bg-muted/20">
                   <Label className="text-sm font-medium mb-2 block">Card Details</Label>
-                  <PaymentElement />
+                   {clientSecret ? <PaymentElement /> : <Loader2 className="w-6 h-6 animate-spin" />}
                 </div>
               )}
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading || (paymentMethod === 'card' && !stripe)}>
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading || (paymentMethod === 'card' && (!stripe || !clientSecret))}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Processing...' : `Confirm Order - $${total.toFixed(2)}`}
               </Button>
@@ -303,7 +312,7 @@ export default function CheckoutPage() {
   }, [user, isAuthLoading, cart, router]);
 
   useEffect(() => {
-    if (cart.length > 0 && total > 0.50 && !clientSecret) { // Stripe requires a minimum amount
+    if (cart.length > 0 && total > 0.50) { // Stripe requires a minimum amount
       createPaymentIntent(total)
         .then(secret => {
           setClientSecret(secret);
@@ -312,7 +321,7 @@ export default function CheckoutPage() {
             console.error("Failed to create payment intent", err);
         });
     }
-  }, [cart, total, clientSecret]);
+  }, [cart, total]);
   
   if (isAuthLoading || !user || cart.length === 0) {
     return (
@@ -335,17 +344,13 @@ export default function CheckoutPage() {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl font-headline mb-8">Checkout</h1>
-        {(clientSecret || form.watch("paymentMethod") === 'cod') ? (
-          <Elements stripe={stripePromise} options={options}>
-            <CheckoutForm />
-          </Elements>
-        ) : (
-           <div className="flex items-center justify-center p-8">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-           </div>
-        )}
+        <Elements stripe={stripePromise} options={options}>
+          <CheckoutForm clientSecret={clientSecret} />
+        </Elements>
       </main>
       <Footer />
     </div>
   );
 }
+
+    
