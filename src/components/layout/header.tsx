@@ -28,6 +28,12 @@ export function Header() {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -76,6 +82,18 @@ export function Header() {
     </>
   );
 
+  const cartIcon = (
+     <Button variant="ghost" size="icon" className="relative" asChild>
+        <Link href="/cart">
+          <ShoppingCart />
+          {hasMounted && cartItemCount > 0 && (
+            <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
+          )}
+          <span className="sr-only">Cart</span>
+        </Link>
+      </Button>
+  )
+
   return (
     <header className={cn(
       "sticky top-0 z-30 transition-all duration-300",
@@ -93,27 +111,11 @@ export function Header() {
           {navLinks}
           <div className="w-px h-6 bg-border mx-2" />
           {!isLoading && authLinks}
-           <Button variant="ghost" size="icon" className="relative" asChild>
-            <Link href="/cart">
-              <ShoppingCart />
-              {cartItemCount > 0 && (
-                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
-              )}
-              <span className="sr-only">Cart</span>
-            </Link>
-          </Button>
+           {cartIcon}
         </nav>
 
         <div className="ml-auto md:hidden flex items-center">
-           <Button variant="ghost" size="icon" className="relative" asChild>
-            <Link href="/cart">
-              <ShoppingCart />
-              {cartItemCount > 0 && (
-                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
-              )}
-              <span className="sr-only">Cart</span>
-            </Link>
-          </Button>
+           {cartIcon}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
