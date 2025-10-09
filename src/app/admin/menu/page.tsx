@@ -1,11 +1,15 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { menuItems as initialMenuItems, dietaryOptions, categories, type MenuItem } from '@/lib/data';
+import { db, storage } from '@/lib/firebase';
+import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+import { menuItems as initialMenuItems, dietaryOptions, categories, type MenuItem as MenuItemType } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
 
@@ -46,6 +50,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { ImageUpload } from '@/components/image-upload';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const menuItemSchema = z.object({
     name: z.string().min(1, 'Name is required'),
@@ -53,18 +59,38 @@ const menuItemSchema = z.object({
     price: z.coerce.number().positive('Price must be a positive number'),
     category: z.string().min(1, 'Category is required'),
     dietaryTags: z.array(z.string()).optional(),
-    imageId: z.string().min(1, 'Image is required'),
+    imageId: z.string().optional(),
+    image: z.any().optional(),
+    imageUrl: z.string().optional(),
+    imageSource: z.enum(['placeholder', 'upload']).default('placeholder'),
 });
 
 type MenuItemFormValues = z.infer<typeof menuItemSchema>;
 
+type FirestoreMenuItem = Omit<MenuItemType, 'id'> & { id: string, userImageUrl?: string };
+
 export default function MenuAdminPage() {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(initialMenuItems);
+  const [menuItems, setMenuItems] = useState<FirestoreMenuItem[]>([]);
+  const [isLoadingItems, setIsLoadingItems] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [editingItem, setEditingItem] = useState<FirestoreMenuItem | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<FirestoreMenuItem | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const menuCollectionRef = collection(db, "menu_items");
+    const unsubscribe = onSnapshot(menuCollectionRef, (snapshot) => {
+        const items = snapshot.docs.map(doc => ({ ...doc.data() as Omit<MenuItemType, 'id'>, id: doc.id, userImageUrl: doc.data().userImageUrl }))
+        setMenuItems(items);
+        setIsLoadingItems(false);
+    }, (error) => {
+        console.error("Error fetching menu items:", error);
+        toast({ title: "Error", description: "Failed to load menu items.", variant: "destructive"});
+        setIsLoadingItems(false);
+    });
+    return () => unsubscribe();
+  }, [toast]);
 
   const form = useForm<MenuItemFormValues>({
     resolver: zodResolver(menuItemSchema),
@@ -74,9 +100,13 @@ export default function MenuAdminPage() {
         price: 0,
         category: '',
         dietaryTags: [],
-        imageId: ''
+        imageId: '',
+        imageUrl: '',
+        imageSource: 'placeholder',
     }
   });
+
+  const imageSource = form.watch('imageSource');
 
   const handleAddNew = () => {
     setEditingItem(null);
@@ -86,47 +116,91 @@ export default function MenuAdminPage() {
         price: 0,
         category: '',
         dietaryTags: [],
-        imageId: ''
+        imageId: '',
+        image: null,
+        imageUrl: '',
+        imageSource: 'placeholder',
     });
     setIsFormOpen(true);
   };
 
-  const handleEdit = (item: MenuItem) => {
+  const handleEdit = (item: FirestoreMenuItem) => {
     setEditingItem(item);
-    form.reset(item);
+    form.reset({
+      ...item,
+      image: null, // Don't carry over file object
+      imageUrl: item.userImageUrl || item.imageId,
+      imageSource: item.userImageUrl ? 'upload' : 'placeholder'
+    });
     setIsFormOpen(true);
   };
 
-  const handleDeleteConfirmation = (item: MenuItem) => {
+  const handleDeleteConfirmation = (item: FirestoreMenuItem) => {
     setItemToDelete(item);
     setIsDeleteDialogOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!itemToDelete) return;
-    setMenuItems(menuItems.filter(item => item.id !== itemToDelete.id));
-    toast({ title: "Success", description: "Menu item deleted." });
+    try {
+        await deleteDoc(doc(db, "menu_items", itemToDelete.id));
+        toast({ title: "Success", description: "Menu item deleted." });
+    } catch(error) {
+        console.error("Error deleting document:", error);
+        toast({ title: "Error", description: "Could not delete menu item.", variant: "destructive" });
+    }
     setIsDeleteDialogOpen(false);
     setItemToDelete(null);
   };
 
-  const onSubmit = (data: MenuItemFormValues) => {
-    if (editingItem) {
-      // Edit
-      const updatedItems = menuItems.map(item => item.id === editingItem.id ? { ...editingItem, ...data } : item);
-      setMenuItems(updatedItems);
-      toast({ title: "Success", description: "Menu item updated." });
-    } else {
-      // Add
-      const newItem: MenuItem = {
-        id: Math.max(...menuItems.map(i => i.id), 0) + 1,
-        ...data,
-      };
-      setMenuItems([...menuItems, newItem]);
-      toast({ title: "Success", description: "Menu item added." });
+  const onSubmit = async (data: MenuItemFormValues) => {
+    try {
+        let userImageUrl: string | undefined = undefined;
+
+        // Handle image upload if a new image file is provided
+        if (data.imageSource === 'upload' && data.image instanceof File) {
+            const imageFile = data.image;
+            const storageRef = ref(storage, `menu_images/${Date.now()}_${imageFile.name}`);
+            const snapshot = await uploadBytes(storageRef, imageFile);
+            userImageUrl = await getDownloadURL(snapshot.ref);
+        } else if (data.imageSource === 'upload' && editingItem?.userImageUrl) {
+            userImageUrl = editingItem.userImageUrl;
+        }
+
+        const payload = {
+            name: data.name,
+            description: data.description,
+            price: data.price,
+            category: data.category,
+            dietaryTags: data.dietaryTags || [],
+            imageId: data.imageSource === 'placeholder' ? data.imageId : '',
+            userImageUrl: userImageUrl,
+        };
+
+        if (editingItem) {
+            // Edit
+            const docRef = doc(db, 'menu_items', editingItem.id);
+            await updateDoc(docRef, payload);
+            toast({ title: "Success", description: "Menu item updated." });
+        } else {
+            // Add
+            await addDoc(collection(db, 'menu_items'), payload);
+            toast({ title: "Success", description: "Menu item added." });
+        }
+        setIsFormOpen(false);
+        setEditingItem(null);
+    } catch (error) {
+        console.error("Error saving menu item:", error);
+        toast({ title: "Error", description: "Failed to save menu item.", variant: 'destructive'});
     }
-    setIsFormOpen(false);
-    setEditingItem(null);
+  }
+  
+  const getDisplayImageUrl = (item: FirestoreMenuItem) => {
+    if (item.userImageUrl) {
+      return item.userImageUrl;
+    }
+    const placeholder = PlaceHolderImages.find(p => p.id === item.imageId);
+    return placeholder?.imageUrl || 'https://placehold.co/100x100';
   }
 
   return (
@@ -145,60 +219,66 @@ export default function MenuAdminPage() {
                 <CardDescription>Manage your restaurant's menu here.</CardDescription>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead className="hidden md:table-cell">Tags</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead><span className="sr-only">Actions</span></TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {menuItems.map((item) => (
-                            <TableRow key={item.id}>
-                                <TableCell className="hidden sm:table-cell">
-                                    <Image
-                                        src={PlaceHolderImages.find(p => p.id === item.imageId)?.imageUrl || 'https://placehold.co/100x100'}
-                                        alt={item.name}
-                                        width={64}
-                                        height={64}
-                                        className="rounded-md object-cover w-16 h-16"
-                                    />
-                                </TableCell>
-                                <TableCell className="font-medium">{item.name}</TableCell>
-                                <TableCell>{item.category}</TableCell>
-                                <TableCell className="hidden md:table-cell">
-                                    <div className="flex gap-1 flex-wrap">
-                                        {item.dietaryTags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
-                                    </div>
-                                </TableCell>
-                                <TableCell>${item.price.toFixed(2)}</TableCell>
-                                <TableCell>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                                <span className="sr-only">Toggle menu</span>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => handleEdit(item)}>
-                                                <FileEdit className="mr-2"/>Edit
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteConfirmation(item)}>
-                                                <Trash2 className="mr-2"/>Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
+                 {isLoadingItems ? (
+                    <div className="flex justify-center items-center h-64">
+                        <Loader2 className="w-8 h-8 animate-spin" />
+                    </div>
+                 ) : (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Category</TableHead>
+                                <TableHead className="hidden md:table-cell">Tags</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead><span className="sr-only">Actions</span></TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {menuItems.map((item) => (
+                                <TableRow key={item.id}>
+                                    <TableCell className="hidden sm:table-cell">
+                                        <Image
+                                            src={getDisplayImageUrl(item)}
+                                            alt={item.name}
+                                            width={64}
+                                            height={64}
+                                            className="rounded-md object-cover w-16 h-16"
+                                        />
+                                    </TableCell>
+                                    <TableCell className="font-medium">{item.name}</TableCell>
+                                    <TableCell>{item.category}</TableCell>
+                                    <TableCell className="hidden md:table-cell">
+                                        <div className="flex gap-1 flex-wrap">
+                                            {item.dietaryTags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>${item.price.toFixed(2)}</TableCell>
+                                    <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                    <span className="sr-only">Toggle menu</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handleEdit(item)}>
+                                                    <FileEdit className="mr-2"/>Edit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteConfirmation(item)}>
+                                                    <Trash2 className="mr-2"/>Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
             </CardContent>
         </Card>
 
@@ -213,7 +293,7 @@ export default function MenuAdminPage() {
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="overflow-y-auto">
-                        <div className="grid gap-4 p-6">
+                        <div className="grid gap-6 p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField control={form.control} name="name" render={({ field }) => (
                                     <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
@@ -225,29 +305,74 @@ export default function MenuAdminPage() {
                             <FormField control={form.control} name="description" render={({ field }) => (
                                 <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField control={form.control} name="category" render={({ field }) => (
-                                    <FormItem><FormLabel>Category</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl>
-                                        <SelectContent>
-                                            {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage /></FormItem>
-                                )} />
+                            <FormField control={form.control} name="category" render={({ field }) => (
+                                <FormItem><FormLabel>Category</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage /></FormItem>
+                            )} />
+
+                            <FormField
+                                control={form.control}
+                                name="imageSource"
+                                render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                    <FormLabel>Image Source</FormLabel>
+                                    <FormControl>
+                                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4">
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl><RadioGroupItem value="placeholder" /></FormControl>
+                                            <FormLabel className="font-normal">Choose Placeholder</FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl><RadioGroupItem value="upload" /></FormControl>
+                                            <FormLabel className="font-normal">Upload Own Image</FormLabel>
+                                        </FormItem>
+                                    </RadioGroup>
+                                    </FormControl>
+                                </FormItem>
+                                )}
+                            />
+
+                            {imageSource === 'placeholder' ? (
                                 <FormField control={form.control} name="imageId" render={({ field }) => (
-                                <FormItem><FormLabel>Image</FormLabel>
+                                <FormItem><FormLabel>Placeholder Image</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl><SelectTrigger><SelectValue placeholder="Select an image" /></SelectTrigger></FormControl>
                                         <SelectContent>
-                                            {PlaceHolderImages.map(img => <SelectItem key={img.id} value={img.id}>{img.id}</SelectItem>)}
+                                            {PlaceHolderImages.map(img => <SelectItem key={img.id} value={img.id}>{img.description}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage /></FormItem>
                                 )} />
-                            </div>
-                            <FormField control={form.control} name="dietaryTags" render={({ field }) => (
+                            ) : (
+                               <FormField
+                                    control={form.control}
+                                    name="image"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Custom Image</FormLabel>
+                                            <FormControl>
+                                               <ImageUpload
+                                                    value={field.value ? URL.createObjectURL(field.value) : form.getValues('imageUrl')}
+                                                    onChange={(file) => field.onChange(file)}
+                                                    onRemove={() => {
+                                                        field.onChange(null);
+                                                        form.setValue('imageUrl', '');
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+                            
+                            <FormField control={form.control} name="dietaryTags" render={() => (
                                 <FormItem>
                                     <FormLabel>Dietary Tags</FormLabel>
                                     <div className="grid grid-cols-2 gap-2">
@@ -312,5 +437,3 @@ export default function MenuAdminPage() {
     </div>
   );
 }
-
-    
