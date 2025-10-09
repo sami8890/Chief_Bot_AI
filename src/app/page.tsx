@@ -24,10 +24,9 @@ export default function Home() {
   const firestore = useFirestore();
 
   useEffect(() => {
-    if (!firestore) {
-        // Firestore might not be initialized on first render
-        return;
-    }
+    // Wait until firestore is initialized
+    if (!firestore) return;
+
     const menuCollectionRef = collection(firestore, "menu_items");
     const unsubscribe = onSnapshot(menuCollectionRef, (snapshot) => {
         const items = snapshot.docs.map(doc => {
@@ -47,8 +46,12 @@ export default function Home() {
         setIsLoading(false);
     }, (error) => {
         console.error("Error fetching menu items for customer:", error);
+        // In a real app, you might want to show a toast or a more user-friendly error message.
+        // For now, we'll just log it and show an empty menu state.
         setIsLoading(false);
     });
+
+    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, [firestore]);
 
@@ -63,8 +66,9 @@ export default function Home() {
         </div>
         <div id="main-content" className="container mx-auto px-4 py-8 md:py-12">
           {isLoading ? (
-            <div className="flex justify-center items-center h-96">
-                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            <div className="flex flex-col justify-center items-center h-96">
+                <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground">Loading our delicious menu...</p>
             </div>
           ) : (
             <MenuWrapper menuItems={menuItems} dietaryOptions={dietaryOptions} />

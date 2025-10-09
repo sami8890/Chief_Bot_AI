@@ -26,40 +26,59 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     if (!firestore) return;
 
+    let active = true; // Flag to prevent state updates on unmounted component
+    let initialLoadComplete = false;
+
+    const onInitialLoad = () => {
+      if (active && !initialLoadComplete) {
+        setIsLoading(false);
+        initialLoadComplete = true;
+      }
+    };
+
     const ordersQuery = query(collection(firestore, "orders"), orderBy("date", "desc"));
     const usersQuery = query(collection(firestore, "users"), orderBy("joinedDate", "desc"));
     const menuItemsRef = collection(firestore, "menu_items");
 
     const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
       const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-      setOrders(fetchedOrders);
-      setIsLoading(false);
+      if (active) setOrders(fetchedOrders);
+      onInitialLoad();
     }, (error) => {
       const contextualError = new FirestorePermissionError({ operation: 'list', path: 'orders' });
       errorEmitter.emit('permission-error', contextualError);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch orders.' });
-      setIsLoading(false);
+      if (active) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch orders.' });
+        setIsLoading(false);
+      }
     });
 
     const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
       const fetchedCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
-      setCustomers(fetchedCustomers);
+      if (active) setCustomers(fetchedCustomers);
+      onInitialLoad();
     }, (error) => {
       const contextualError = new FirestorePermissionError({ operation: 'list', path: 'users' });
       errorEmitter.emit('permission-error', contextualError);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch customers.' });
+      if (active) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch customers.' });
+      }
     });
     
     const unsubscribeMenuItems = onSnapshot(menuItemsRef, (snapshot) => {
-        setMenuItemCount(snapshot.size);
+        if (active) setMenuItemCount(snapshot.size);
+        onInitialLoad();
     }, (error) => {
       const contextualError = new FirestorePermissionError({ operation: 'list', path: 'menu_items' });
       errorEmitter.emit('permission-error', contextualError);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch menu item count.' });
+       if (active) {
+          toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch menu item count.' });
+       }
     });
 
 
     return () => {
+      active = false;
       unsubscribeOrders();
       unsubscribeUsers();
       unsubscribeMenuItems();
@@ -173,5 +192,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    

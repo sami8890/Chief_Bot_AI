@@ -137,11 +137,25 @@ export default function MenuAdminPage() {
 
   const imageSource = form.watch('imageSource');
   const currentImageFile = form.watch('image');
+  const currentPlaceholderId = form.watch('imageId');
+
   const getImageUrlForForm = () => {
     if (editingItem?.userImageUrl) return editingItem.userImageUrl;
-    const placeholder = PlaceHolderImages.find(p => p.id === editingItem?.imageId);
-    return placeholder?.imageUrl;
+    if (editingItem?.imageId) {
+        const placeholder = PlaceHolderImages.find(p => p.id === editingItem.imageId);
+        return placeholder?.imageUrl;
+    }
+    return undefined;
   }
+  
+  const getSelectedPlaceholderUrl = () => {
+    if (currentPlaceholderId) {
+        const placeholder = PlaceHolderImages.find(p => p.id === currentPlaceholderId);
+        return placeholder?.imageUrl;
+    }
+    return undefined;
+  }
+
 
   const handleAddNew = () => {
     setEditingItem(null);
@@ -197,6 +211,7 @@ export default function MenuAdminPage() {
     
     form.clearErrors();
     let userImageUrl: string | undefined = editingItem?.userImageUrl;
+    let imageId: string | undefined = data.imageId;
 
     try {
         if (data.imageSource === 'upload' && data.image instanceof File) {
@@ -204,17 +219,19 @@ export default function MenuAdminPage() {
             const storageRef = ref(storage, `menu_images/${Date.now()}_${imageFile.name}`);
             const snapshot = await uploadBytes(storageRef, imageFile);
             userImageUrl = await getDownloadURL(snapshot.ref);
+            imageId = undefined; // Clear placeholder if custom is uploaded
         } else if (data.imageSource === 'placeholder') {
              userImageUrl = undefined; // Clear custom image if placeholder is selected
+             imageId = data.imageId;
         }
     
-        const payload = {
+        const payload: Omit<MenuItem, 'id'> = {
             name: data.name,
             description: data.description,
             price: data.price,
             category: data.category,
             dietaryTags: data.dietaryTags || [],
-            imageId: data.imageSource === 'placeholder' ? data.imageId : undefined,
+            imageId: imageId,
             userImageUrl: userImageUrl,
         };
     
@@ -254,7 +271,7 @@ export default function MenuAdminPage() {
         setIsFormOpen(false);
         setEditingItem(null);
     } catch(e) {
-        toast({ title: "Error", description: "An unexpected error occurred.", variant: 'destructive'});
+        toast({ title: "Error", description: "An unexpected error occurred during image upload.", variant: 'destructive'});
         console.error(e);
     }
   }
@@ -402,16 +419,23 @@ export default function MenuAdminPage() {
                   />
 
                   {imageSource === 'placeholder' ? (
-                    <FormField control={form.control} name="imageId" render={({ field }) => (
-                      <FormItem><FormLabel>Placeholder Image</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl><SelectTrigger><SelectValue placeholder="Select an image" /></SelectTrigger></FormControl>
-                          <SelectContent>
-                            {PlaceHolderImages.map(img => <SelectItem key={img.id} value={img.id}>{img.description}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage /></FormItem>
-                    )} />
+                    <>
+                      <FormField control={form.control} name="imageId" render={({ field }) => (
+                        <FormItem><FormLabel>Placeholder Image</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select an image" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {PlaceHolderImages.map(img => <SelectItem key={img.id} value={img.id}>{img.description}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage /></FormItem>
+                      )} />
+                      {getSelectedPlaceholderUrl() && (
+                        <div className="relative w-full h-48 rounded-md overflow-hidden border">
+                            <Image src={getSelectedPlaceholderUrl()!} alt="Placeholder preview" layout="fill" objectFit="cover" />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <FormField
                       control={form.control}

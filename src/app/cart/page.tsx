@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCart } from "@/context/cart-context";
@@ -19,6 +20,12 @@ export default function CartPage() {
   const tax = subtotal * 0.08; // Example 8% tax
   const total = subtotal + tax;
 
+  const getDisplayImageUrl = (item: (typeof cart)[0]) => {
+    if (item.userImageUrl) return item.userImageUrl;
+    const placeholder = PlaceHolderImages.find(p => p.id === item.imageId);
+    return placeholder?.imageUrl || 'https://placehold.co/100x100';
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -36,14 +43,16 @@ export default function CartPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2 space-y-4">
-              {cart.map(item => {
-                const placeholder = PlaceHolderImages.find(p => p.id === item.imageId);
-                return (
+              {cart.map(item => (
                   <Card key={item.id} className="overflow-hidden">
                     <div className="flex flex-col sm:flex-row items-start p-4 gap-4">
-                      {placeholder && (
-                          <Image src={placeholder.imageUrl} alt={item.name} width={100} height={100} className="rounded-md object-cover w-full sm:w-24 sm:h-24 aspect-video sm:aspect-square" />
-                      )}
+                      <Image 
+                        src={getDisplayImageUrl(item)}
+                        alt={item.name} 
+                        width={100} 
+                        height={100} 
+                        className="rounded-md object-cover w-full sm:w-24 sm:h-24 aspect-video sm:aspect-square" 
+                      />
                       <div className="flex-grow w-full">
                           <div className="flex justify-between items-start">
                             <div>
@@ -71,7 +80,7 @@ export default function CartPage() {
                     </div>
                   </Card>
                 )
-              })}
+              )}
             </div>
             <div className="lg:col-span-1 sticky top-24">
               <Card>

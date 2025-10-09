@@ -35,10 +35,6 @@ export function MenuWrapper({ menuItems, dietaryOptions }: { menuItems: MenuItem
     return items;
   }, [menuItems, activeFilters, searchTerm]);
   
-  const menuAsString = useMemo(() => {
-    return menuItems.map(item => `${item.name}: ${item.description}`).join('\n');
-  }, [menuItems]);
-
   return (
     <section id="menu">
         <div className="text-center mb-8">
@@ -46,7 +42,7 @@ export function MenuWrapper({ menuItems, dietaryOptions }: { menuItems: MenuItem
           <p className="text-muted-foreground mt-2">Explore our curated selection of exquisite dishes.</p>
         </div>
         <div className="mb-8 p-6 rounded-lg border bg-card text-card-foreground shadow-sm">
-            <PersonalizedRecommendations menu={menuAsString} allMenuItems={menuItems} />
+            <PersonalizedRecommendations allMenuItems={menuItems} />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <aside className="md:col-span-1">

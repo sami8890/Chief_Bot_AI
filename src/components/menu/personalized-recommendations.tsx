@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { getPersonalizedRecommendations, type PersonalizedRecommendationsOutput } from '@/ai/flows/personalized-recommendations';
+import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Lightbulb, Loader2, Sparkles, ChefHat } from 'lucide-react';
 import { MenuCard } from './menu-card';
@@ -42,11 +42,15 @@ const examplePrompts = [
     "Surprise me with a unique appetizer!",
 ]
 
-export function PersonalizedRecommendations({ menu, allMenuItems }: { menu: string, allMenuItems: MenuItem[] }) {
+export function PersonalizedRecommendations({ allMenuItems }: { allMenuItems: MenuItem[] }) {
   const [recommendations, setRecommendations] = useState<MenuItem[]>([]);
   const [reasonings, setReasonings] = useState<{[key: string]: string}>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const menuAsString = useMemo(() => {
+    return allMenuItems.map(item => `${item.name}: ${item.description}`).join('\n');
+  }, [allMenuItems]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,7 +69,7 @@ export function PersonalizedRecommendations({ menu, allMenuItems }: { menu: stri
       const result = await getPersonalizedRecommendations({
         ...values,
         dietaryNeeds: values.dietaryNeeds || 'None',
-        menu,
+        menu: menuAsString,
       });
       
       if (result && result.recommendations) {
