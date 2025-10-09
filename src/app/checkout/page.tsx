@@ -296,6 +296,7 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isLoadingSecret, setIsLoadingSecret] = useState(true);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.08;
@@ -313,13 +314,19 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (cart.length > 0 && total > 0.50) { // Stripe requires a minimum amount
+      setIsLoadingSecret(true);
       createPaymentIntent(total)
         .then(secret => {
           setClientSecret(secret);
         })
         .catch(err => {
             console.error("Failed to create payment intent", err);
+        })
+        .finally(() => {
+            setIsLoadingSecret(false);
         });
+    } else if (cart.length > 0) {
+        setIsLoadingSecret(false);
     }
   }, [cart, total]);
   
@@ -344,9 +351,15 @@ export default function CheckoutPage() {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl font-headline mb-8">Checkout</h1>
-        <Elements stripe={stripePromise} options={options}>
-          <CheckoutForm clientSecret={clientSecret} />
-        </Elements>
+        {isLoadingSecret ? (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+        ) : (
+            <Elements stripe={stripePromise} options={options}>
+              <CheckoutForm clientSecret={clientSecret} />
+            </Elements>
+        )}
       </main>
       <Footer />
     </div>
