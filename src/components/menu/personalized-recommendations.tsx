@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -96,7 +97,7 @@ export function PersonalizedRecommendations({ menu }: { menu: string }) {
   }
 
   return (
-    <Accordion type="single" collapsible>
+    <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1" className="border-b-0">
         <AccordionTrigger className="text-xl font-headline hover:no-underline">
           <div className="flex items-center gap-2">
@@ -105,20 +106,9 @@ export function PersonalizedRecommendations({ menu }: { menu: string }) {
           </div>
         </AccordionTrigger>
         <AccordionContent className="pt-4">
-          <p className="text-muted-foreground mb-4">
+          <p className="text-muted-foreground mb-6">
             Tell us what you like, and our AI chef will suggest the perfect dishes for you from our menu.
           </p>
-
-           <div className="mb-4">
-              <h4 className="text-sm font-semibold mb-2">Need ideas? Try one of these:</h4>
-              <div className="flex flex-wrap gap-2">
-                {examplePrompts.map(prompt => (
-                    <Button key={prompt} variant="outline" size="sm" onClick={() => handleExamplePrompt(prompt)}>
-                        {prompt}
-                    </Button>
-                ))}
-              </div>
-           </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -129,7 +119,7 @@ export function PersonalizedRecommendations({ menu }: { menu: string }) {
                   <FormItem>
                     <FormLabel>What are you in the mood for?</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g., 'I love spicy food, but I'm not a fan of cilantro. I'm looking for something light and healthy.'" {...field} />
+                      <Textarea placeholder="e.g., 'I love spicy food, but I'm not a fan of cilantro...'" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -140,7 +130,7 @@ export function PersonalizedRecommendations({ menu }: { menu: string }) {
                 name="dietaryNeeds"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Any dietary restrictions?</FormLabel>
+                    <FormLabel>Any dietary restrictions? (Optional)</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., 'vegetarian, gluten-free'" {...field} />
                     </FormControl>
@@ -148,29 +138,44 @@ export function PersonalizedRecommendations({ menu }: { menu: string }) {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLoading ? 'Thinking...' : 'Get Recommendations'}
-              </Button>
+               <div className="flex flex-wrap items-center gap-2">
+                <Button type="submit" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isLoading ? 'Thinking...' : 'Get Recommendations'}
+                </Button>
+                <span className="text-sm text-muted-foreground hidden sm:inline-block">or try an example:</span>
+                 <div className="flex flex-wrap gap-2">
+                    {examplePrompts.slice(0,2).map(prompt => (
+                        <Button key={prompt} variant="outline" size="sm" onClick={() => handleExamplePrompt(prompt)} disabled={isLoading}>
+                            "{prompt}"
+                        </Button>
+                    ))}
+                 </div>
+               </div>
             </form>
           </Form>
           
-          {isLoading && <p className="mt-4 text-muted-foreground">Our AI Chef is thinking...</p>}
+          {isLoading && (
+            <div className="mt-8 flex items-center justify-center text-muted-foreground">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <span>Our AI Chef is thinking...</span>
+            </div>
+          )}
           {error && <p className="mt-4 text-destructive">{error}</p>}
 
-          {recommendations.length > 0 && (
+          {recommendations.length > 0 && !isLoading && (
             <div className="mt-8">
                 <Separator className="my-6" />
-                <h3 className="text-lg font-headline mb-4 flex items-center gap-2">
+                <h3 className="text-2xl font-headline mb-4 flex items-center gap-2">
                     <ChefHat className="text-primary"/>
                     Our AI Chef Recommends...
                 </h3>
                 <div className="space-y-6">
                     {recommendations.map(item => (
                         <div key={item.id}>
-                            <Alert className="mb-2 bg-accent/10 border-accent/20">
+                            <Alert className="mb-2 bg-accent/10 border-accent/20 text-accent-foreground">
                                 <Lightbulb className="h-4 w-4 text-accent" />
-                                <AlertTitle className="font-semibold text-accent">Why we chose this for you:</AlertTitle>
+                                <AlertTitle className="font-semibold text-accent">Why you'll love it:</AlertTitle>
                                 <AlertDescription>{reasonings[item.name]}</AlertDescription>
                             </Alert>
                             <MenuCard item={item} />
