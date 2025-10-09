@@ -33,7 +33,6 @@ export default function UsersPage() {
             setCustomers(fetchedCustomers);
             setIsLoading(false);
         }, (error) => {
-            console.error("Error fetching users:", error);
             const contextualError = new FirestorePermissionError({
               operation: 'list',
               path: 'users',
@@ -104,3 +103,5 @@ export default function UsersPage() {
     </div>
   );
 }
+
+    

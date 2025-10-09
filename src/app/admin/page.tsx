@@ -10,6 +10,9 @@ import type { Order, Customer } from '@/lib/data';
 import { SalesChart } from '@/components/admin/sales-chart';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format, subDays } from 'date-fns';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -18,6 +21,7 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!firestore) return;
@@ -31,7 +35,9 @@ export default function AdminDashboardPage() {
       setOrders(fetchedOrders);
       setIsLoading(false);
     }, (error) => {
-      console.error("Error fetching orders:", error);
+      const contextualError = new FirestorePermissionError({ operation: 'list', path: 'orders' });
+      errorEmitter.emit('permission-error', contextualError);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch orders.' });
       setIsLoading(false);
     });
 
@@ -39,13 +45,17 @@ export default function AdminDashboardPage() {
       const fetchedCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
       setCustomers(fetchedCustomers);
     }, (error) => {
-      console.error("Error fetching customers:", error);
+      const contextualError = new FirestorePermissionError({ operation: 'list', path: 'users' });
+      errorEmitter.emit('permission-error', contextualError);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch customers.' });
     });
     
     const unsubscribeMenuItems = onSnapshot(menuItemsRef, (snapshot) => {
         setMenuItemCount(snapshot.size);
     }, (error) => {
-        console.error("Error fetching menu items:", error);
+      const contextualError = new FirestorePermissionError({ operation: 'list', path: 'menu_items' });
+      errorEmitter.emit('permission-error', contextualError);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch menu item count.' });
     });
 
 
@@ -54,7 +64,7 @@ export default function AdminDashboardPage() {
       unsubscribeUsers();
       unsubscribeMenuItems();
     };
-  }, [firestore]);
+  }, [firestore, toast]);
 
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
   const totalOrders = orders.length;
@@ -163,3 +173,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    

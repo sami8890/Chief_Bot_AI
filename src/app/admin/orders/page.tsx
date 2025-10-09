@@ -49,7 +49,6 @@ export default function OrdersPage() {
             setOrders(fetchedOrders);
             setIsLoading(false);
         }, (error) => {
-            console.error("Error fetching orders:", error);
             const contextualError = new FirestorePermissionError({
               operation: 'list',
               path: 'orders',
@@ -74,7 +73,6 @@ export default function OrdersPage() {
                 })
             })
             .catch(error => {
-                console.error("Error updating order status:", error);
                 const contextualError = new FirestorePermissionError({
                   operation: 'update',
                   path: orderRef.path,
@@ -159,3 +157,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+    
