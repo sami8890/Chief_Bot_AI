@@ -56,8 +56,10 @@ export async function createOrder(
         const docRef = await addDoc(collection(db, 'orders'), orderData);
 
         return { success: true, orderId: docRef.id };
-    } catch(e) {
+    } catch(e: any) {
         console.error("Error creating order: ", e);
-        return { success: false, error: 'Failed to create order in database.'};
+        // Return the specific Firebase error message instead of a generic one.
+        const errorMessage = e.message || 'Failed to create order in database.';
+        return { success: false, error: errorMessage };
     }
 }
