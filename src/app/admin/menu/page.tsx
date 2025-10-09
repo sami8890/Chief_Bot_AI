@@ -67,25 +67,38 @@ const menuItemSchema = z.object({
 
 type MenuItemFormValues = z.infer<typeof menuItemSchema>;
 
-type FirestoreMenuItem = Omit<MenuItemType, 'id'> & { id: string, userImageUrl?: string };
+// Correctly type the menu item as it comes from Firestore
+type MenuItem = MenuItemType & {
+    id: string;
+    userImageUrl?: string;
+};
+
 
 export default function MenuAdminPage() {
-  const [menuItems, setMenuItems] = useState<FirestoreMenuItem[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<FirestoreMenuItem | null>(null);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<FirestoreMenuItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const menuCollectionRef = collection(db, "menu_items");
     const unsubscribe = onSnapshot(menuCollectionRef, (snapshot) => {
-        const items = snapshot.docs.map(doc => ({
-             id: doc.id,
-             ...doc.data(),
-             userImageUrl: doc.data().userImageUrl
-         })) as FirestoreMenuItem[];
+        const items = snapshot.docs.map(doc => {
+             const data = doc.data();
+             return {
+                 id: doc.id,
+                 name: data.name,
+                 description: data.description,
+                 price: data.price,
+                 category: data.category,
+                 dietaryTags: data.dietaryTags || [],
+                 imageId: data.imageId,
+                 userImageUrl: data.userImageUrl,
+             } as MenuItem;
+         });
         setMenuItems(items);
         setIsLoadingItems(false);
     }, (error) => {
@@ -128,7 +141,7 @@ export default function MenuAdminPage() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = (item: FirestoreMenuItem) => {
+  const handleEdit = (item: MenuItem) => {
     setEditingItem(item);
     form.reset({
       ...item,
@@ -139,7 +152,7 @@ export default function MenuAdminPage() {
     setIsFormOpen(true);
   };
 
-  const handleDeleteConfirmation = (item: FirestoreMenuItem) => {
+  const handleDeleteConfirmation = (item: MenuItem) => {
     setItemToDelete(item);
     setIsDeleteDialogOpen(true);
   };
@@ -199,7 +212,7 @@ export default function MenuAdminPage() {
     }
   }
   
-  const getDisplayImageUrl = (item: FirestoreMenuItem) => {
+  const getDisplayImageUrl = (item: MenuItem) => {
     if (item.userImageUrl) {
       return item.userImageUrl;
     }
