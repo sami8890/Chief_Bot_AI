@@ -50,12 +50,14 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const isAdmin = user && user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
   const navLinks = (
     <>
       <NavLink href="/#menu" onClick={() => setIsMobileMenuOpen(false)}>Menu</NavLink>
       <NavLink href="/#testimonials" onClick={() => setIsMobileMenuOpen(false)}>Testimonials</NavLink>
       <NavLink href="/#gallery" onClick={() => setIsMobileMenuOpen(false)}>Gallery</NavLink>
-      {user && user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+      {isAdmin && (
          <NavLink href="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin</NavLink>
       )}
     </>
