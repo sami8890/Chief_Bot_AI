@@ -6,6 +6,7 @@ import { menuItems, restaurantInfo, dietaryOptions, testimonials, galleryImageId
 import { Footer } from '@/components/layout/footer';
 import { Testimonials } from '@/components/testimonials';
 import { Gallery } from '@/components/gallery';
+import { FoodIdentifier } from '@/components/food-identifier';
 
 export default function Home() {
   return (
@@ -13,6 +14,9 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
+        <div className="py-12 bg-muted/20">
+          <FoodIdentifier />
+        </div>
         <div id="main-content" className="container mx-auto px-4 py-8 md:py-12">
           <MenuWrapper menuItems={menuItems} dietaryOptions={dietaryOptions} />
           <div className="my-16" />
