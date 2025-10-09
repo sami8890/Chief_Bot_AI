@@ -9,7 +9,7 @@ import { db, storage } from '@/lib/firebase';
 import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-import { dietaryOptions, categories, type MenuItem as MenuItemType } from '@/lib/data';
+import { dietaryOptions, categories } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
 
@@ -52,6 +52,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { ImageUpload } from '@/components/image-upload';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const menuItemSchema = z.object({
     name: z.string().min(1, 'Name is required'),
@@ -67,9 +69,14 @@ const menuItemSchema = z.object({
 
 type MenuItemFormValues = z.infer<typeof menuItemSchema>;
 
-// Correctly type the menu item as it comes from Firestore
-type MenuItem = MenuItemType & {
+type MenuItem = {
     id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    dietaryTags: string[];
+    imageId?: string;
     userImageUrl?: string;
 };
 
@@ -102,7 +109,11 @@ export default function MenuAdminPage() {
         setMenuItems(items);
         setIsLoadingItems(false);
     }, (error) => {
-        console.error("Error fetching menu items:", error);
+        const contextualError = new FirestorePermissionError({
+          operation: 'list',
+          path: menuCollectionRef.path,
+        });
+        errorEmitter.emit('permission-error', contextualError);
         toast({ title: "Error", description: "Failed to load menu items.", variant: "destructive"});
         setIsLoadingItems(false);
     });
@@ -159,13 +170,19 @@ export default function MenuAdminPage() {
 
   const handleDelete = async () => {
     if (!itemToDelete) return;
-    try {
-        await deleteDoc(doc(db, "menu_items", itemToDelete.id));
-        toast({ title: "Success", description: "Menu item deleted." });
-    } catch(error) {
-        console.error("Error deleting document:", error);
-        toast({ title: "Error", description: "Could not delete menu item.", variant: "destructive" });
-    }
+    const docRef = doc(db, "menu_items", itemToDelete.id);
+    deleteDoc(docRef)
+        .then(() => {
+             toast({ title: "Success", description: "Menu item deleted." });
+        })
+        .catch(error => {
+            const contextualError = new FirestorePermissionError({
+              operation: 'delete',
+              path: docRef.path,
+            });
+            errorEmitter.emit('permission-error', contextualError);
+            toast({ title: "Error", description: "Could not delete menu item.", variant: "destructive" });
+        });
     setIsDeleteDialogOpen(false);
     setItemToDelete(null);
   };
@@ -190,25 +207,48 @@ export default function MenuAdminPage() {
             price: data.price,
             category: data.category,
             dietaryTags: data.dietaryTags || [],
-            imageId: data.imageSource === 'placeholder' ? data.imageId : '',
+            imageId: data.imageSource === 'placeholder' ? data.imageId : undefined,
             userImageUrl: userImageUrl,
         };
 
         if (editingItem) {
             // Edit
             const docRef = doc(db, 'menu_items', editingItem.id);
-            await updateDoc(docRef, payload);
-            toast({ title: "Success", description: "Menu item updated." });
+            updateDoc(docRef, payload)
+                .then(() => {
+                    toast({ title: "Success", description: "Menu item updated." });
+                })
+                .catch(error => {
+                     const contextualError = new FirestorePermissionError({
+                      operation: 'update',
+                      path: docRef.path,
+                      requestResourceData: payload,
+                    });
+                    errorEmitter.emit('permission-error', contextualError);
+                    toast({ title: "Error", description: "Failed to save menu item.", variant: 'destructive'});
+                });
         } else {
             // Add
-            await addDoc(collection(db, 'menu_items'), payload);
-            toast({ title: "Success", description: "Menu item added." });
+            const collectionRef = collection(db, 'menu_items');
+            addDoc(collectionRef, payload)
+                .then(() => {
+                    toast({ title: "Success", description: "Menu item added." });
+                })
+                .catch(error => {
+                     const contextualError = new FirestorePermissionError({
+                      operation: 'create',
+                      path: collectionRef.path,
+                      requestResourceData: payload,
+                    });
+                    errorEmitter.emit('permission-error', contextualError);
+                    toast({ title: "Error", description: "Failed to save menu item.", variant: 'destructive'});
+                });
         }
         setIsFormOpen(false);
         setEditingItem(null);
     } catch (error) {
-        console.error("Error saving menu item:", error);
-        toast({ title: "Error", description: "Failed to save menu item.", variant: 'destructive'});
+        console.error("Error uploading image or preparing data:", error);
+        toast({ title: "Error", description: "An unexpected error occurred during image processing.", variant: 'destructive'});
     }
   }
   
