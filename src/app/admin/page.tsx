@@ -26,15 +26,20 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     if (!firestore) return;
 
-    let active = true; // Flag to prevent state updates on unmounted component
-    let initialLoadComplete = false;
-
-    const onInitialLoad = () => {
-      if (active && !initialLoadComplete) {
-        setIsLoading(false);
-        initialLoadComplete = true;
-      }
+    let active = true; 
+    
+    // Use an object to track loading state of each data source
+    const loadingStates = {
+        orders: true,
+        customers: true,
+        menuItems: true,
     };
+    const checkAllLoaded = () => {
+        if (active && !Object.values(loadingStates).some(s => s)) {
+            setIsLoading(false);
+        }
+    }
+
 
     const ordersQuery = query(collection(firestore, "orders"), orderBy("date", "desc"));
     const usersQuery = query(collection(firestore, "users"), orderBy("joinedDate", "desc"));
@@ -42,37 +47,51 @@ export default function AdminDashboardPage() {
 
     const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
       const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-      if (active) setOrders(fetchedOrders);
-      onInitialLoad();
+      if (active) {
+        setOrders(fetchedOrders);
+        loadingStates.orders = false;
+        checkAllLoaded();
+      }
     }, (error) => {
       const contextualError = new FirestorePermissionError({ operation: 'list', path: 'orders' });
       errorEmitter.emit('permission-error', contextualError);
       if (active) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch orders.' });
-        setIsLoading(false);
+        loadingStates.orders = false;
+        checkAllLoaded();
       }
     });
 
     const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
       const fetchedCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
-      if (active) setCustomers(fetchedCustomers);
-      onInitialLoad();
+      if (active) {
+        setCustomers(fetchedCustomers);
+        loadingStates.customers = false;
+        checkAllLoaded();
+      }
     }, (error) => {
       const contextualError = new FirestorePermissionError({ operation: 'list', path: 'users' });
       errorEmitter.emit('permission-error', contextualError);
       if (active) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch customers.' });
+        loadingStates.customers = false;
+        checkAllLoaded();
       }
     });
     
     const unsubscribeMenuItems = onSnapshot(menuItemsRef, (snapshot) => {
-        if (active) setMenuItemCount(snapshot.size);
-        onInitialLoad();
+        if (active) {
+            setMenuItemCount(snapshot.size);
+            loadingStates.menuItems = false;
+            checkAllLoaded();
+        }
     }, (error) => {
       const contextualError = new FirestorePermissionError({ operation: 'list', path: 'menu_items' });
       errorEmitter.emit('permission-error', contextualError);
        if (active) {
           toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch menu item count.' });
+          loadingStates.menuItems = false;
+          checkAllLoaded();
        }
     });
 
