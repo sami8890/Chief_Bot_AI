@@ -204,82 +204,84 @@ export default function MenuAdminPage() {
 
         {/* Form Dialog */}
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-            <DialogContent className="sm:max-w-[625px]">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[625px] grid-rows-[auto_1fr_auto] p-0 max-h-[90vh]">
+                <DialogHeader className="p-6 pb-0">
                     <DialogTitle>{editingItem ? 'Edit Menu Item' : 'Add New Menu Item'}</DialogTitle>
                     <DialogDescription>
                         {editingItem ? 'Update the details of your menu item.' : 'Fill in the details for the new menu item.'}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField control={form.control} name="name" render={({ field }) => (
-                                <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="overflow-y-auto">
+                        <div className="grid gap-4 p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField control={form.control} name="name" render={({ field }) => (
+                                    <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="price" render={({ field }) => (
+                                    <FormItem><FormLabel>Price</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                            </div>
+                            <FormField control={form.control} name="description" render={({ field }) => (
+                                <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
-                            <FormField control={form.control} name="price" render={({ field }) => (
-                                <FormItem><FormLabel>Price</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField control={form.control} name="category" render={({ field }) => (
+                                    <FormItem><FormLabel>Category</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="imageId" render={({ field }) => (
+                                <FormItem><FormLabel>Image</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select an image" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            {PlaceHolderImages.map(img => <SelectItem key={img.id} value={img.id}>{img.id}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage /></FormItem>
+                                )} />
+                            </div>
+                            <FormField control={form.control} name="dietaryTags" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Dietary Tags</FormLabel>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {dietaryOptions.map((option) => (
+                                            <FormField
+                                                key={option}
+                                                control={form.control}
+                                                name="dietaryTags"
+                                                render={({ field }) => {
+                                                    return (
+                                                    <FormItem key={option} className="flex flex-row items-start space-x-3 space-y-0">
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value?.includes(option)}
+                                                                onCheckedChange={(checked) => {
+                                                                    return checked
+                                                                    ? field.onChange([...(field.value || []), option])
+                                                                    : field.onChange(field.value?.filter((value) => value !== option))
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className="font-normal capitalize">{option.replace('-', ' ')}</FormLabel>
+                                                    </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
                             )} />
                         </div>
-                        <FormField control={form.control} name="description" render={({ field }) => (
-                            <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField control={form.control} name="category" render={({ field }) => (
-                                <FormItem><FormLabel>Category</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage /></FormItem>
-                            )} />
-                            <FormField control={form.control} name="imageId" render={({ field }) => (
-                               <FormItem><FormLabel>Image</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select an image" /></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        {PlaceHolderImages.map(img => <SelectItem key={img.id} value={img.id}>{img.id}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage /></FormItem>
-                            )} />
-                        </div>
-                        <FormField control={form.control} name="dietaryTags" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Dietary Tags</FormLabel>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {dietaryOptions.map((option) => (
-                                        <FormField
-                                            key={option}
-                                            control={form.control}
-                                            name="dietaryTags"
-                                            render={({ field }) => {
-                                                return (
-                                                <FormItem key={option} className="flex flex-row items-start space-x-3 space-y-0">
-                                                    <FormControl>
-                                                        <Checkbox
-                                                            checked={field.value?.includes(option)}
-                                                            onCheckedChange={(checked) => {
-                                                                return checked
-                                                                ? field.onChange([...(field.value || []), option])
-                                                                : field.onChange(field.value?.filter((value) => value !== option))
-                                                            }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className="font-normal capitalize">{option.replace('-', ' ')}</FormLabel>
-                                                </FormItem>
-                                                )
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-
-                        <DialogFooter>
+                        
+                        <DialogFooter className="p-6 pt-0 sticky bottom-0 bg-background border-t">
                             <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
                             <Button type="submit" disabled={form.formState.isSubmitting}>
                                 {form.formState.isSubmitting && <Loader2 className="mr-2 animate-spin" />}
@@ -310,3 +312,5 @@ export default function MenuAdminPage() {
     </div>
   );
 }
+
+    
