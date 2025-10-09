@@ -4,9 +4,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Utensils, Users, ShoppingCart, DollarSign, Loader2 } from "lucide-react";
-import { menuItems } from "@/lib/data";
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import type { Order, Customer } from '@/lib/data';
 import { SalesChart } from '@/components/admin/sales-chart';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -15,16 +14,18 @@ import { format, subDays } from 'date-fns';
 export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [menuItemCount, setMenuItemCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
     const usersQuery = query(collection(db, "users"), orderBy("joinedDate", "desc"));
+    const menuItemsRef = collection(db, "menu_items");
 
     const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
       const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
       setOrders(fetchedOrders);
-      setIsLoading(false);
+      if(!isLoading) setIsLoading(false);
     }, (error) => {
       console.error("Error fetching orders:", error);
       setIsLoading(false);
@@ -36,14 +37,23 @@ export default function AdminDashboardPage() {
     }, (error) => {
       console.error("Error fetching customers:", error);
     });
+    
+    const unsubscribeMenuItems = onSnapshot(menuItemsRef, (snapshot) => {
+        setMenuItemCount(snapshot.size);
+        if(isLoading) setIsLoading(false);
+    }, (error) => {
+        console.error("Error fetching menu items:", error);
+        if(isLoading) setIsLoading(false);
+    })
+
 
     return () => {
       unsubscribeOrders();
       unsubscribeUsers();
+      unsubscribeMenuItems();
     };
   }, []);
 
-  const totalMenuItems = menuItems.length;
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
   const totalOrders = orders.length;
   const totalCustomers = customers.length;
@@ -106,7 +116,7 @@ export default function AdminDashboardPage() {
                     <Utensils className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{totalMenuItems}</div>
+                    <div className="text-2xl font-bold">{menuItemCount}</div>
                     <p className="text-xs text-muted-foreground">Dishes available for customers</p>
                 </CardContent>
             </Card>

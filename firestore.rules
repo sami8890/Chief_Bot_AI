@@ -2,41 +2,47 @@
  * @fileoverview Firestore Security Rules for GastronomicAI application.
  *
  * Core Philosophy:
- * This ruleset enforces a strict data ownership model for user-specific data while allowing public read access to restaurant and menu item information.
- * Write access is carefully controlled based on user authentication and explicit ownership or relational links.
+ * This ruleset enforces a strict data ownership model for user-specific data (preferences).
+ * Restaurant and MenuItem data is publicly readable, but write access is generally denied
+ * except where explicitly allowed.  Reviews are publicly readable and writable.
  *
  * Data Structure:
- * - /restaurants/{restaurantId}: Stores restaurant information, publicly readable.
- * - /restaurants/{restaurantId}/menu_items/{menuItemId}: Stores menu items, publicly readable, but writes restricted.
- * - /dietary_restrictions/{dietaryRestrictionId}: Stores dietary restrictions, publicly readable, but writes restricted.
- * - /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId}: Stores relationships between menu items and dietary restrictions; writes are restricted.
- * - /users/{userId}/preferences/{userPreferenceId}: Stores user preferences, only accessible to the owning user.
- * - /restaurants/{restaurantId}/reviews/{reviewId}: Stores reviews for restaurants, writes are restricted.
+ * - /restaurants/{restaurantId}: Stores public restaurant data.
+ * - /restaurants/{restaurantId}/menu_items/{menuItemId}: Stores public menu item data for each restaurant.
+ * - /dietary_restrictions/{dietaryRestrictionId}: Stores global dietary restrictions.
+ * - /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId}: Stores the relationships between menu items and dietary restrictions.
+ * - /users/{userId}/preferences/{userPreferenceId}: Stores private user preferences.
+ * - /restaurants/{restaurantId}/reviews/{reviewId}: Stores public reviews for each restaurant.
  *
  * Key Security Decisions:
- * - Public read access to restaurants, menu items, and dietary restrictions to facilitate discovery and browsing.
- * - User-specific preferences are stored under the /users/{userId} path and are only accessible to the authenticated user.
- * - Write access to all collections, including restaurants, menu items, dietary restrictions, and reviews, is restricted to prevent unauthorized modifications.
- * - The rules explicitly deny listing user preferences by anyone other than the owner.
+ * - Restaurants and menu items are generally publicly readable.
+ * - User preferences are private and only accessible to the owning user.
+ * - Reviews are publicly readable and writable, so abusive reviews must be handled via other means (e.g. moderation).
+ * - Listing all documents in a collection should be avoided unless the data is intended to be fully public.
+ * - The rules do not enforce a strict schema, allowing for flexible data shapes during prototyping.
  *
  * Denormalization for Authorization:
- *  - This ruleset avoids `get()` calls by assuming that any authorization-relevant data (e.g., restaurant ownership for menu item updates) would be denormalized onto the relevant documents at the time of creation or update via backend functions.
+ * - The application avoids `get()` calls by denormalizing authorization data. For example,
+ *   if access to a MenuItem needs to be restricted to certain restaurant staff, the staff's
+ *   UIDs would be stored in a `members` map within the Restaurant document, and this `members`
+ *   map would be copied into each MenuItem document under that restaurant. This allows security
+ *   rules for MenuItems to be evaluated without needing to read the parent Restaurant document.
  *
  * Structural Segregation:
- *  - User preferences are stored in a dedicated user subcollection to ensure privacy and prevent accidental exposure of sensitive data.
+ * - User preferences are stored under `/users/{userId}/preferences` to ensure private user data.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows public read access to restaurant information but restricts write access.
+     * @description Allows read-only access to restaurants. Write access is denied.
      * @path /restaurants/{restaurantId}
      * @allow get, list: if true;
-     * @allow create: if false;
-     * @allow update: if false;
-     * @allow delete: if false;
-     * @principle Public read, restricted write.
+     * @deny create: if false;
+     * @deny update: if false;
+     * @deny delete: if false;
+     * @principle Public read access to restaurant information.
      */
     match /restaurants/{restaurantId} {
       allow get, list: if true;
@@ -46,13 +52,13 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows public read access to menu items but restricts write access.
+     * @description Allows read-only access to menu items. Write access is denied.
      * @path /restaurants/{restaurantId}/menu_items/{menuItemId}
      * @allow get, list: if true;
-     * @allow create: if false;
-     * @allow update: if false;
-     * @allow delete: if false;
-     * @principle Public read, restricted write.
+     * @deny create: if false;
+     * @deny update: if false;
+     * @deny delete: if false;
+     * @principle Public read access to menu item information.
      */
     match /restaurants/{restaurantId}/menu_items/{menuItemId} {
       allow get, list: if true;
@@ -62,13 +68,13 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows public read access to dietary restrictions but restricts write access.
+     * @description Allows read-only access to dietary restrictions. Write access is denied.
      * @path /dietary_restrictions/{dietaryRestrictionId}
      * @allow get, list: if true;
-     * @allow create: if false;
-     * @allow update: if false;
-     * @allow delete: if false;
-     * @principle Public read, restricted write.
+     * @deny create: if false;
+     * @deny update: if false;
+     * @deny delete: if false;
+     * @principle Public read access to dietary restriction information.
      */
     match /dietary_restrictions/{dietaryRestrictionId} {
       allow get, list: if true;
@@ -78,82 +84,75 @@ service cloud.firestore {
     }
 
     /**
-     * @description Restricts all access to the menu_item_dietary_restrictions collection.
+     * @description Allows read-only access to menu item dietary restrictions. Write access is denied.
      * @path /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId}
-     * @allow get, list: if false;
-     * @allow create: if false;
-     * @allow update: if false;
-     * @allow delete: if false;
-     * @principle Restricted access.
+     * @allow get, list: if true;
+     * @deny create: if false;
+     * @deny update: if false;
+     * @deny delete: if false;
+     * @principle Public read access to menu item dietary restriction information.
      */
     match /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId} {
-      allow get, list: if false;
+      allow get, list: if true;
       allow create: if false;
       allow update: if false;
       allow delete: if false;
     }
 
     /**
-     * @description Allows a user to read and write their own preferences.
+     * @description Manages user preferences. Allows a user to read and write their own preferences only.
      * @path /users/{userId}/preferences/{userPreferenceId}
      * @allow get, list: if isOwner(userId);
-     * @allow create: if request.auth.uid == userId;
+     * @allow create: if isOwner(userId);
      * @allow update: if isExistingOwner(userId);
      * @allow delete: if isExistingOwner(userId);
      * @allow (create): if request.auth.uid == userId;
-     * @deny list: if !isOwner(userId);
-     * @principle Enforces user-ownership for user preferences.
+     * @allow (update): if request.auth.uid == userId && resource != null;
+     * @allow (delete): if request.auth.uid == userId && resource != null;
+     * @deny get, list: if !isSignedIn();
+     * @deny create: if !isSignedIn();
+     * @deny update: if !isSignedIn();
+     * @deny delete: if !isSignedIn();
+     * @principle Enforces user-ownership for preferences; requires authentication.
      */
     match /users/{userId}/preferences/{userPreferenceId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if request.auth.uid == userId;
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description Restricts all access to the reviews collection.
+     * @description Allows read and write access to restaurant reviews.
      * @path /restaurants/{restaurantId}/reviews/{reviewId}
-     * @allow get, list: if false;
-     * @allow create: if false;
-     * @allow update: if false;
-     * @allow delete: if false;
-     * @principle Restricted access.
+     * @allow get, list: if true;
+     * @allow create: if isSignedIn();
+     * @allow update: if isReviewOwner(request.auth.uid, resource.data.userId) && resource != null;
+     * @allow delete: if isReviewOwner(request.auth.uid, resource.data.userId) && resource != null;
+     * @principle Public read access to reviews, authenticated write access.
      */
     match /restaurants/{restaurantId}/reviews/{reviewId} {
-      allow get, list: if false;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if isReviewOwner(request.auth.uid, resource.data.userId) && resource != null;
+      allow delete: if isReviewOwner(request.auth.uid, resource.data.userId) && resource != null;
     }
+  }
 
-    // --- Helper Functions ---
+  // Helper functions
+  function isSignedIn() {
+    return request.auth != null;
+  }
 
-    /**
-     * @description Checks if the user is signed in.
-     * @return {boolean} True if the user is signed in, false otherwise.
-     */
-    function isSignedIn() {
-      return request.auth != null;
-    }
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
 
-    /**
-     * @description Checks if the request is made by the owner of the document.
-     * @param {string} userId - The user ID to check against.
-     * @return {boolean} True if the user ID matches the authenticated user's ID.
-     */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
+  function isExistingOwner(userId) {
+    return isOwner(userId) && resource != null;
+  }
 
-    /**
-     * @description Checks if the request is made by the owner of an existing document.
-     * @param {string} userId - The user ID to check against.
-     * @return {boolean} True if the user ID matches the authenticated user's ID and the document exists.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
+    function isReviewOwner(userId, reviewUserId) {
+    return userId == reviewUserId;
   }
 }

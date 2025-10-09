@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { MenuItem } from '@/lib/data';
-import { menuItems as allMenuItems } from '@/lib/data';
 
 import {
   Accordion,
@@ -43,7 +42,7 @@ const examplePrompts = [
     "Surprise me with a unique appetizer!",
 ]
 
-export function PersonalizedRecommendations({ menu }: { menu: string }) {
+export function PersonalizedRecommendations({ menu, allMenuItems }: { menu: string, allMenuItems: MenuItem[] }) {
   const [recommendations, setRecommendations] = useState<MenuItem[]>([]);
   const [reasonings, setReasonings] = useState<{[key: string]: string}>({});
   const [isLoading, setIsLoading] = useState(false);

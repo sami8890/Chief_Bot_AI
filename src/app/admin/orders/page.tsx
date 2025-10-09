@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { type Order } from '@/lib/data';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -20,6 +20,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 const statusColors: { [key: string]: string } = {
     Pending: 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30',
@@ -36,18 +38,21 @@ export default function OrdersPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        const ordersRef = collection(db, "orders");
-        const unsubscribe = onSnapshot(ordersRef, (snapshot) => {
+        const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
+        const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
             const fetchedOrders: Order[] = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...(doc.data() as Omit<Order, 'id'>)
             }));
-            // Sort orders by date, most recent first
-            fetchedOrders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
             setOrders(fetchedOrders);
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching orders:", error);
+            const contextualError = new FirestorePermissionError({
+              operation: 'list',
+              path: 'orders',
+            });
+            errorEmitter.emit('permission-error', contextualError);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch orders.'});
             setIsLoading(false);
         });
@@ -58,16 +63,23 @@ export default function OrdersPage() {
 
     const updateOrderStatus = async (orderId: string, status: Order['status']) => {
         const orderRef = doc(db, "orders", orderId);
-        try {
-            await updateDoc(orderRef, { status });
-            toast({
-                title: "Order Updated",
-                description: `Order #${orderId.substring(0,6)}... has been marked as ${status}.`
+        updateDoc(orderRef, { status })
+            .then(() => {
+                toast({
+                    title: "Order Updated",
+                    description: `Order #${orderId.substring(0,6)}... has been marked as ${status}.`
+                })
             })
-        } catch (error) {
-            console.error("Error updating order status:", error);
-             toast({ variant: 'destructive', title: 'Error', description: 'Failed to update order status.'});
-        }
+            .catch(error => {
+                console.error("Error updating order status:", error);
+                const contextualError = new FirestorePermissionError({
+                  operation: 'update',
+                  path: orderRef.path,
+                  requestResourceData: { status }
+                });
+                errorEmitter.emit('permission-error', contextualError);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to update order status.'});
+            });
     }
 
   return (

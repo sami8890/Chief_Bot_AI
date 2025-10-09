@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -45,7 +46,7 @@ export function MenuWrapper({ menuItems, dietaryOptions }: { menuItems: MenuItem
           <p className="text-muted-foreground mt-2">Explore our curated selection of exquisite dishes.</p>
         </div>
         <div className="mb-8 p-6 rounded-lg border bg-card text-card-foreground shadow-sm">
-            <PersonalizedRecommendations menu={menuAsString} />
+            <PersonalizedRecommendations menu={menuAsString} allMenuItems={menuItems} />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <aside className="md:col-span-1">

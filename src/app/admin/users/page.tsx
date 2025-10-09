@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { type Customer } from '@/lib/data';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,6 +12,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 
 export default function UsersPage() {
@@ -20,17 +22,21 @@ export default function UsersPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        const usersRef = collection(db, 'users');
-        const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+        const usersQuery = query(collection(db, 'users'), orderBy("joinedDate", "desc"));
+        const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
             const fetchedCustomers: Customer[] = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...(doc.data() as Omit<Customer, 'id'>)
             }));
-            fetchedCustomers.sort((a, b) => new Date(b.joinedDate).getTime() - new Date(a.joinedDate).getTime());
             setCustomers(fetchedCustomers);
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching users:", error);
+            const contextualError = new FirestorePermissionError({
+              operation: 'list',
+              path: 'users',
+            });
+            errorEmitter.emit('permission-error', contextualError);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch customers.' });
             setIsLoading(false);
         });
