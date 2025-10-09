@@ -188,68 +188,63 @@ export default function MenuAdminPage() {
   };
 
   const onSubmit = async (data: MenuItemFormValues) => {
-    try {
-        let userImageUrl: string | undefined = undefined;
-
-        // Handle image upload if a new image file is provided
-        if (data.imageSource === 'upload' && data.image instanceof File) {
-            const imageFile = data.image;
-            const storageRef = ref(storage, `menu_images/${Date.now()}_${imageFile.name}`);
-            const snapshot = await uploadBytes(storageRef, imageFile);
-            userImageUrl = await getDownloadURL(snapshot.ref);
-        } else if (data.imageSource === 'upload' && editingItem?.userImageUrl) {
-            userImageUrl = editingItem.userImageUrl;
-        }
-
-        const payload = {
-            name: data.name,
-            description: data.description,
-            price: data.price,
-            category: data.category,
-            dietaryTags: data.dietaryTags || [],
-            imageId: data.imageSource === 'placeholder' ? data.imageId : undefined,
-            userImageUrl: userImageUrl,
-        };
-
-        if (editingItem) {
-            // Edit
-            const docRef = doc(db, 'menu_items', editingItem.id);
-            updateDoc(docRef, payload)
-                .then(() => {
-                    toast({ title: "Success", description: "Menu item updated." });
-                })
-                .catch(error => {
-                     const contextualError = new FirestorePermissionError({
-                      operation: 'update',
-                      path: docRef.path,
-                      requestResourceData: payload,
-                    });
-                    errorEmitter.emit('permission-error', contextualError);
-                    toast({ title: "Error", description: "Failed to save menu item.", variant: 'destructive'});
-                });
-        } else {
-            // Add
-            const collectionRef = collection(db, 'menu_items');
-            addDoc(collectionRef, payload)
-                .then(() => {
-                    toast({ title: "Success", description: "Menu item added." });
-                })
-                .catch(error => {
-                     const contextualError = new FirestorePermissionError({
-                      operation: 'create',
-                      path: collectionRef.path,
-                      requestResourceData: payload,
-                    });
-                    errorEmitter.emit('permission-error', contextualError);
-                    toast({ title: "Error", description: "Failed to save menu item.", variant: 'destructive'});
-                });
-        }
-        setIsFormOpen(false);
-        setEditingItem(null);
-    } catch (error) {
-        console.error("Error uploading image or preparing data:", error);
-        toast({ title: "Error", description: "An unexpected error occurred during image processing.", variant: 'destructive'});
+    let userImageUrl: string | undefined = undefined;
+    
+    // Handle image upload if a new image file is provided
+    if (data.imageSource === 'upload' && data.image instanceof File) {
+        const imageFile = data.image;
+        const storageRef = ref(storage, `menu_images/${Date.now()}_${imageFile.name}`);
+        const snapshot = await uploadBytes(storageRef, imageFile);
+        userImageUrl = await getDownloadURL(snapshot.ref);
+    } else if (data.imageSource === 'upload' && editingItem?.userImageUrl) {
+        userImageUrl = editingItem.userImageUrl;
     }
+
+    const payload = {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        category: data.category,
+        dietaryTags: data.dietaryTags || [],
+        imageId: data.imageSource === 'placeholder' ? data.imageId : undefined,
+        userImageUrl: userImageUrl,
+    };
+
+    if (editingItem) {
+        // Edit
+        const docRef = doc(db, 'menu_items', editingItem.id);
+        updateDoc(docRef, payload)
+            .then(() => {
+                toast({ title: "Success", description: "Menu item updated." });
+            })
+            .catch(error => {
+                 const contextualError = new FirestorePermissionError({
+                  operation: 'update',
+                  path: docRef.path,
+                  requestResourceData: payload,
+                });
+                errorEmitter.emit('permission-error', contextualError);
+                toast({ title: "Error", description: "Failed to save menu item.", variant: 'destructive'});
+            });
+    } else {
+        // Add
+        const collectionRef = collection(db, 'menu_items');
+        addDoc(collectionRef, payload)
+            .then(() => {
+                toast({ title: "Success", description: "Menu item added." });
+            })
+            .catch(error => {
+                 const contextualError = new FirestorePermissionError({
+                  operation: 'create',
+                  path: collectionRef.path,
+                  requestResourceData: payload,
+                });
+                errorEmitter.emit('permission-error', contextualError);
+                toast({ title: "Error", description: "Failed to save menu item.", variant: 'destructive'});
+            });
+    }
+    setIsFormOpen(false);
+    setEditingItem(null);
   }
   
   const getDisplayImageUrl = (item: MenuItem) => {
@@ -494,3 +489,5 @@ export default function MenuAdminPage() {
     </div>
   );
 }
+
+    
