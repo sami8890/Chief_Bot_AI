@@ -2,11 +2,13 @@
 'use server';
 
 import { stripe } from '@/lib/stripe';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc } from 'firebase/firestore/lite';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { firebaseConfig } from '@/firebase/config';
 import type { CartItem } from '@/context/cart-context';
-import { auth } from '@/lib/firebase';
-import { headers } from 'next/headers';
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
 
 export async function createPaymentIntent(amount: number) {
   try {

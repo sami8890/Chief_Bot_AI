@@ -11,7 +11,7 @@ import { Testimonials } from '@/components/testimonials';
 import { Gallery } from '@/components/gallery';
 import { FoodIdentifier } from '@/components/food-identifier';
 import { useEffect, useState } from 'react';
-import { db } from '@/lib/firebase';
+import { useFirestore } from '@/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import type { MenuItem } from '@/lib/data';
 import { dietaryOptions } from '@/lib/data';
@@ -21,9 +21,14 @@ import { Loader2 } from 'lucide-react';
 export default function Home() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const firestore = useFirestore();
 
   useEffect(() => {
-    const menuCollectionRef = collection(db, "menu_items");
+    if (!firestore) {
+        // Firestore might not be initialized on first render
+        return;
+    }
+    const menuCollectionRef = collection(firestore, "menu_items");
     const unsubscribe = onSnapshot(menuCollectionRef, (snapshot) => {
         const items = snapshot.docs.map(doc => {
              const data = doc.data();
@@ -45,7 +50,7 @@ export default function Home() {
         setIsLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [firestore]);
 
 
   return (

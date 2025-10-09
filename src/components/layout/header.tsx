@@ -4,8 +4,7 @@
 import { UtensilsCrossed, Menu as MenuIcon, X, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/use-auth';
-import { auth } from '@/lib/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -23,7 +22,8 @@ const NavLink = ({ href, children, onClick }: { href: string; children: React.Re
 );
 
 export function Header() {
-  const { user, isLoading } = useAuth();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const { cart } = useCart();
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -33,7 +33,6 @@ export function Header() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -56,7 +55,9 @@ export function Header() {
       <NavLink href="/#menu" onClick={() => setIsMobileMenuOpen(false)}>Menu</NavLink>
       <NavLink href="/#testimonials" onClick={() => setIsMobileMenuOpen(false)}>Testimonials</NavLink>
       <NavLink href="/#gallery" onClick={() => setIsMobileMenuOpen(false)}>Gallery</NavLink>
-      <NavLink href="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin</NavLink>
+      {user && user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+         <NavLink href="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin</NavLink>
+      )}
     </>
   );
 
@@ -110,7 +111,7 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-2 ml-auto">
           {navLinks}
           <div className="w-px h-6 bg-border mx-2" />
-          {!isLoading && authLinks}
+          {!isUserLoading && authLinks}
            {cartIcon}
         </nav>
 
@@ -143,7 +144,7 @@ export function Header() {
                   {navLinks}
                 </nav>
                 <div className="mt-auto border-t pt-6 flex flex-col gap-2">
-                  {!isLoading && authLinks}
+                  {!isUserLoading && authLinks}
                 </div>
               </div>
             </SheetContent>

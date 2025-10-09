@@ -2,14 +2,14 @@
 import type { CartItem as CartItemType } from '@/context/cart-context';
 
 export type MenuItem = {
-  id: string; // Changed from number to string to match Firestore ID
+  id: string; 
   name: string;
   description: string;
   price: number;
   category: string;
   dietaryTags: string[];
-  imageId?: string; // Placeholder image ID
-  userImageUrl?: string; // Custom uploaded image URL
+  imageId?: string;
+  userImageUrl?: string; 
 };
 
 export type CartItem = MenuItem & {
@@ -17,11 +17,11 @@ export type CartItem = MenuItem & {
 };
 
 export type Order = {
-  id: string; // Firestore document ID
+  id: string; 
   userId: string;
   customerName: string;
   customerEmail: string;
-  date: string; // ISO string
+  date: string;
   total: number;
   status: 'Pending' | 'Confirmed' | 'Delivered' | 'Cancelled';
   items: CartItemType[];
@@ -31,10 +31,10 @@ export type Order = {
 };
 
 export type Customer = {
-    id: string; // Firestore document ID (which is user.uid)
+    id: string; 
     name: string;
     email: string;
-    joinedDate: string; // ISO string
+    joinedDate: string;
 }
 
 export type RestaurantInfoType = {
@@ -75,28 +75,6 @@ export const dietaryOptions: string[] = [
 ];
 
 export const categories = ['Appetizers', 'Salads', 'Soups', 'Main Courses', 'Desserts'];
-
-// This is now just for local data, not for the main menu display which is fetched from Firestore
-export const localMenuItems: Omit<MenuItem, 'id'>[] = [
-  {
-    name: 'Sunrise Bruschetta',
-    description:
-      'Toasted artisan bread topped with a vibrant mix of diced tomatoes, fresh basil, garlic, and a drizzle of extra virgin olive oil.',
-    price: 12.5,
-    category: 'Appetizers',
-    dietaryTags: ['vegetarian', 'vegan', 'dairy-free'],
-    imageId: 'bruschetta',
-  },
-  {
-    name: 'Golden Quinoa Salad',
-    description:
-      'A refreshing salad with tri-color quinoa, cucumber, cherry tomatoes, and a zesty lemon-herb vinaigrette.',
-    price: 15.0,
-    category: 'Salads',
-    dietaryTags: ['vegetarian', 'vegan', 'gluten-free', 'dairy-free'],
-    imageId: 'quinoa-salad',
-  },
-];
 
 
 export const testimonials: Testimonial[] = [

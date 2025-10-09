@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAuth } from "@/hooks/use-auth";
+import { useUser } from "@/firebase";
 import { useCart } from "@/context/cart-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,7 +43,7 @@ const checkoutSchema = z.object({
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
-  const { user } = useAuth();
+  const { user } = useUser();
   const { cart, clearCart } = useCart();
   const router = useRouter();
   const stripe = useStripe();
@@ -72,7 +72,6 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
 
   useEffect(() => {
     if (paymentMethod === 'card' && !clientSecret) {
-      // This case is handled by the parent, but as a fallback
       setMessage("Initializing payment... please wait.");
     } else {
       setMessage(null);
@@ -90,7 +89,6 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
         return;
     }
     
-    // Create the order in Firestore first
     const orderResult = await createOrder(
         { userId: user.uid, userName: data.fullName, userEmail: user.email! },
         cart, 
@@ -109,8 +107,6 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
     const successUrl = `/payment/success?orderId=${orderResult.orderId}&amount=${total}&name=${data.fullName}&orderType=${data.orderType}${data.address ? `&address=${encodeURIComponent(data.address)}` : ''}`;
 
     if (data.paymentMethod === 'cod') {
-      // Handle Cash on Delivery
-      console.log("Placing order with Cash on Delivery", data);
       clearCart();
       router.push(successUrl);
       return;
@@ -291,7 +287,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
 
 
 export default function CheckoutPage() {
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isUserLoading: isAuthLoading } = useUser();
   const { cart } = useCart();
   const router = useRouter();
 
@@ -365,5 +361,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    

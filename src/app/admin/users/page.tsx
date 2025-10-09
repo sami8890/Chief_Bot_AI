@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { type Customer } from '@/lib/data';
-import { db } from '@/lib/firebase';
+import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -20,9 +20,11 @@ export default function UsersPage() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
+    const firestore = useFirestore();
 
     useEffect(() => {
-        const usersQuery = query(collection(db, 'users'), orderBy("joinedDate", "desc"));
+        if (!firestore) return;
+        const usersQuery = query(collection(firestore, 'users'), orderBy("joinedDate", "desc"));
         const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
             const fetchedCustomers: Customer[] = snapshot.docs.map(doc => ({
                 id: doc.id,
@@ -42,7 +44,7 @@ export default function UsersPage() {
         });
 
         return () => unsubscribe();
-    }, [toast]);
+    }, [firestore, toast]);
 
   return (
     <div>

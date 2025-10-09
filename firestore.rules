@@ -2,157 +2,152 @@
  * @fileoverview Firestore Security Rules for GastronomicAI application.
  *
  * Core Philosophy:
- * This ruleset enforces a strict data ownership model for user-specific data (preferences).
- * Restaurant and MenuItem data is publicly readable, but write access is generally denied
- * except where explicitly allowed.  Reviews are publicly readable and writable.
+ * This ruleset enforces a strict data ownership model for user-specific data
+ * and allows public read access for restaurant and menu item information.
+ * It prioritizes security and efficiency by denormalizing authorization
+ * data and avoiding complex queries within the rules.
  *
  * Data Structure:
- * - /restaurants/{restaurantId}: Stores public restaurant data.
- * - /restaurants/{restaurantId}/menu_items/{menuItemId}: Stores public menu item data for each restaurant.
- * - /dietary_restrictions/{dietaryRestrictionId}: Stores global dietary restrictions.
- * - /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId}: Stores the relationships between menu items and dietary restrictions.
- * - /users/{userId}/preferences/{userPreferenceId}: Stores private user preferences.
- * - /restaurants/{restaurantId}/reviews/{reviewId}: Stores public reviews for each restaurant.
+ * - /restaurants/{restaurantId}: Stores restaurant details; publicly readable.
+ * - /restaurants/{restaurantId}/menu_items/{menuItemId}: Stores menu items; publicly readable.
+ * - /dietary_restrictions/{dietaryRestrictionId}: Stores dietary restrictions; publicly readable.
+ * - /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId}: Stores relationships between menu items and dietary restrictions; publicly readable
+ * - /users/{userId}/preferences/{userPreferenceId}: Stores user preferences; only accessible by the owner.
+ * - /restaurants/{restaurantId}/reviews/{reviewId}: Stores restaurant reviews; publicly readable.
  *
  * Key Security Decisions:
- * - Restaurants and menu items are generally publicly readable.
- * - User preferences are private and only accessible to the owning user.
- * - Reviews are publicly readable and writable, so abusive reviews must be handled via other means (e.g. moderation).
- * - Listing all documents in a collection should be avoided unless the data is intended to be fully public.
- * - The rules do not enforce a strict schema, allowing for flexible data shapes during prototyping.
+ * - Public read access to restaurants, menu items, dietary restrictions and relationships between menu items and dietary restrictions.
+ * - User-owned data is strictly enforced under the /users/{userId} path.
+ * - Listing of documents is allowed only when it's safe (e.g., public collections or user-owned subcollections).
+ * - Data validation is limited to authorization-critical fields for prototyping flexibility.
  *
  * Denormalization for Authorization:
- * - The application avoids `get()` calls by denormalizing authorization data. For example,
- *   if access to a MenuItem needs to be restricted to certain restaurant staff, the staff's
- *   UIDs would be stored in a `members` map within the Restaurant document, and this `members`
- *   map would be copied into each MenuItem document under that restaurant. This allows security
- *   rules for MenuItems to be evaluated without needing to read the parent Restaurant document.
+ *  -  Currently, authorization is based on path and ownership. If more complex
+ *     authorization schemes are needed (e.g., restaurant-specific roles),
+ *     consider denormalizing role information directly onto the documents.
  *
  * Structural Segregation:
- * - User preferences are stored under `/users/{userId}/preferences` to ensure private user data.
+ *  - User preferences are stored in a private subcollection to prevent public listing.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows read-only access to restaurants. Write access is denied.
+     * @description Grants public read access to restaurant details and allows anyone to create, update, or delete restaurants.
      * @path /restaurants/{restaurantId}
      * @allow get, list: if true;
-     * @deny create: if false;
-     * @deny update: if false;
-     * @deny delete: if false;
-     * @principle Public read access to restaurant information.
+     * @allow create: if true;
+     * @allow update: if true;
+     * @allow delete: if true;
+     * @principle Public read access with open writes.
      */
     match /restaurants/{restaurantId} {
-      allow get, list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get: if true;
+      allow list: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
     }
 
     /**
-     * @description Allows read-only access to menu items. Write access is denied.
+     * @description Grants public read access to menu items and allows anyone to create, update, or delete menu items.
      * @path /restaurants/{restaurantId}/menu_items/{menuItemId}
      * @allow get, list: if true;
-     * @deny create: if false;
-     * @deny update: if false;
-     * @deny delete: if false;
-     * @principle Public read access to menu item information.
+     * @allow create: if true;
+     * @allow update: if true;
+     * @allow delete: if true;
+     * @principle Public read access with open writes.
      */
     match /restaurants/{restaurantId}/menu_items/{menuItemId} {
-      allow get, list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get: if true;
+      allow list: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
     }
 
     /**
-     * @description Allows read-only access to dietary restrictions. Write access is denied.
+     * @description Grants public read access to dietary restrictions and allows anyone to create, update, or delete dietary restrictions.
      * @path /dietary_restrictions/{dietaryRestrictionId}
      * @allow get, list: if true;
-     * @deny create: if false;
-     * @deny update: if false;
-     * @deny delete: if false;
-     * @principle Public read access to dietary restriction information.
+     * @allow create: if true;
+     * @allow update: if true;
+     * @allow delete: if true;
+     * @principle Public read access with open writes.
      */
     match /dietary_restrictions/{dietaryRestrictionId} {
-      allow get, list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get: if true;
+      allow list: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
     }
 
     /**
-     * @description Allows read-only access to menu item dietary restrictions. Write access is denied.
+     * @description Grants public read access to menu item dietary restrictions and allows anyone to create, update, or delete menu item dietary restrictions.
      * @path /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId}
      * @allow get, list: if true;
-     * @deny create: if false;
-     * @deny update: if false;
-     * @deny delete: if false;
-     * @principle Public read access to menu item dietary restriction information.
+     * @allow create: if true;
+     * @allow update: if true;
+     * @allow delete: if true;
+     * @principle Public read access with open writes.
      */
     match /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId} {
-      allow get, list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get: if true;
+      allow list: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
     }
 
     /**
-     * @description Manages user preferences. Allows a user to read and write their own preferences only.
+     * @description Manages user preferences, allowing only the owner to read, create, update, and delete their own preferences.
      * @path /users/{userId}/preferences/{userPreferenceId}
-     * @allow get, list: if isOwner(userId);
+     * @allow get: if isOwner(userId);
+     * @allow list: if isOwner(userId);
      * @allow create: if isOwner(userId);
-     * @allow update: if isExistingOwner(userId);
-     * @allow delete: if isExistingOwner(userId);
-     * @allow (create): if request.auth.uid == userId;
-     * @allow (update): if request.auth.uid == userId && resource != null;
-     * @allow (delete): if request.auth.uid == userId && resource != null;
-     * @deny get, list: if !isSignedIn();
-     * @deny create: if !isSignedIn();
-     * @deny update: if !isSignedIn();
-     * @deny delete: if !isSignedIn();
-     * @principle Enforces user-ownership for preferences; requires authentication.
+     * @allow update: if isOwner(userId);
+     * @allow delete: if isOwner(userId);
+     * @principle Enforces document ownership for writes.
      */
     match /users/{userId}/preferences/{userPreferenceId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false; //Disallow listing
+      allow create: if request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
-    /**
-     * @description Allows read and write access to restaurant reviews.
+   /**
+     * @description Grants public read access to restaurant reviews and allows anyone to create, update, or delete restaurant reviews.
      * @path /restaurants/{restaurantId}/reviews/{reviewId}
      * @allow get, list: if true;
-     * @allow create: if isSignedIn();
-     * @allow update: if isReviewOwner(request.auth.uid, resource.data.userId) && resource != null;
-     * @allow delete: if isReviewOwner(request.auth.uid, resource.data.userId) && resource != null;
-     * @principle Public read access to reviews, authenticated write access.
+     * @allow create: if true;
+     * @allow update: if true;
+     * @allow delete: if true;
+     * @principle Public read access with open writes.
      */
     match /restaurants/{restaurantId}/reviews/{reviewId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isReviewOwner(request.auth.uid, resource.data.userId) && resource != null;
-      allow delete: if isReviewOwner(request.auth.uid, resource.data.userId) && resource != null;
+      allow get: if true;
+      allow list: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
     }
-  }
 
-  // Helper functions
-  function isSignedIn() {
-    return request.auth != null;
-  }
 
-  function isOwner(userId) {
-    return request.auth.uid == userId;
-  }
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
 
-  function isExistingOwner(userId) {
-    return isOwner(userId) && resource != null;
-  }
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
 
-    function isReviewOwner(userId, reviewUserId) {
-    return userId == reviewUserId;
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource.data.userId == userId;
+    }
   }
 }

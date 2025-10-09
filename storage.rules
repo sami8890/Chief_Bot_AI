@@ -1,0 +1,22 @@
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow admin to read and write all files
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == "admin@gastronomicai.com";
+    }
+    
+    // Only allow admin to upload to the menu_images folder
+    match /menu_images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Deny all other routes
+    match /{allPaths=**} {
+        allow read, write: if false;
+    }
+  }
+}

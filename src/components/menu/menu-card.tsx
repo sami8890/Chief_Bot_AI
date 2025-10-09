@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Leaf, Vegan, WheatOff, MilkOff, ShoppingCart } from 'lucide-react';
 import type { ComponentType } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/firebase';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { MenuAnalyzer } from './menu-analyzer';
@@ -19,8 +19,15 @@ const tagIconMap: { [key: string]: ComponentType<{ className?: string }> } = {
 };
 
 export function MenuCard({ item }: { item: MenuItem }) {
-  const placeholder = PlaceHolderImages.find(p => p.id === item.imageId);
-  const { user } = useAuth();
+  const getDisplayImageUrl = (item: MenuItem) => {
+    if (item.userImageUrl) {
+      return item.userImageUrl;
+    }
+    const placeholder = PlaceHolderImages.find(p => p.id === item.imageId);
+    return placeholder?.imageUrl || 'https://placehold.co/400x300';
+  };
+  
+  const { user } = useUser();
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -42,18 +49,15 @@ export function MenuCard({ item }: { item: MenuItem }) {
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-      {placeholder && (
-        <div className="relative h-48 w-full">
-          <Image
-            src={placeholder.imageUrl}
-            alt={item.name}
-            fill
-            className="object-cover"
-            data-ai-hint={placeholder.imageHint}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        </div>
-      )}
+      <div className="relative h-48 w-full">
+        <Image
+          src={getDisplayImageUrl(item)}
+          alt={item.name}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+      </div>
       <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle className="font-headline">{item.name}</CardTitle>

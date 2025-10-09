@@ -4,8 +4,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Utensils, Users, ShoppingCart, DollarSign, Loader2 } from "lucide-react";
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import type { Order, Customer } from '@/lib/data';
 import { SalesChart } from '@/components/admin/sales-chart';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -16,16 +16,20 @@ export default function AdminDashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [menuItemCount, setMenuItemCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const firestore = useFirestore();
 
   useEffect(() => {
-    const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
-    const usersQuery = query(collection(db, "users"), orderBy("joinedDate", "desc"));
-    const menuItemsRef = collection(db, "menu_items");
+    if (!firestore) return;
+
+    const ordersQuery = query(collection(firestore, "orders"), orderBy("date", "desc"));
+    const usersQuery = query(collection(firestore, "users"), orderBy("joinedDate", "desc"));
+    const menuItemsRef = collection(firestore, "menu_items");
 
     const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
       const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
       setOrders(fetchedOrders);
-      if(!isLoading) setIsLoading(false);
+      setIsLoading(false);
     }, (error) => {
       console.error("Error fetching orders:", error);
       setIsLoading(false);
@@ -40,11 +44,9 @@ export default function AdminDashboardPage() {
     
     const unsubscribeMenuItems = onSnapshot(menuItemsRef, (snapshot) => {
         setMenuItemCount(snapshot.size);
-        if(isLoading) setIsLoading(false);
     }, (error) => {
         console.error("Error fetching menu items:", error);
-        if(isLoading) setIsLoading(false);
-    })
+    });
 
 
     return () => {
@@ -52,7 +54,7 @@ export default function AdminDashboardPage() {
       unsubscribeUsers();
       unsubscribeMenuItems();
     };
-  }, []);
+  }, [firestore]);
 
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
   const totalOrders = orders.length;
@@ -63,9 +65,9 @@ export default function AdminDashboardPage() {
     const date = subDays(new Date(), i);
     const dateString = format(date, 'MMM d');
     const total = orders
-      .filter(order => format(new Date(order.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))
+      .filter(order => new Date(order.date).toDateString() === date.toDateString())
       .reduce((sum, order) => sum + order.total, 0);
-    return { name: dateString, total: total };
+    return { name: dateString, total };
   }).reverse();
 
   if (isLoading) {

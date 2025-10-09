@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { type Order } from '@/lib/data';
-import { db } from '@/lib/firebase';
+import { useFirestore } from '@/firebase';
 import { collection, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -36,9 +36,11 @@ export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
+    const firestore = useFirestore();
 
     useEffect(() => {
-        const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
+        if (!firestore) return;
+        const ordersQuery = query(collection(firestore, "orders"), orderBy("date", "desc"));
         const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
             const fetchedOrders: Order[] = snapshot.docs.map(doc => ({
                 id: doc.id,
@@ -58,11 +60,12 @@ export default function OrdersPage() {
         });
 
         return () => unsubscribe();
-    }, [toast]);
+    }, [firestore, toast]);
 
 
-    const updateOrderStatus = async (orderId: string, status: Order['status']) => {
-        const orderRef = doc(db, "orders", orderId);
+    const updateOrderStatus = (orderId: string, status: Order['status']) => {
+        if (!firestore) return;
+        const orderRef = doc(firestore, "orders", orderId);
         updateDoc(orderRef, { status })
             .then(() => {
                 toast({
