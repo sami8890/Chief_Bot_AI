@@ -9,7 +9,7 @@ import { db, storage } from '@/lib/firebase';
 import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-import { menuItems as initialMenuItems, dietaryOptions, categories, type MenuItem as MenuItemType } from '@/lib/data';
+import { dietaryOptions, categories, type MenuItem as MenuItemType } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
 
@@ -81,7 +81,11 @@ export default function MenuAdminPage() {
   useEffect(() => {
     const menuCollectionRef = collection(db, "menu_items");
     const unsubscribe = onSnapshot(menuCollectionRef, (snapshot) => {
-        const items = snapshot.docs.map(doc => ({ ...doc.data() as Omit<MenuItemType, 'id'>, id: doc.id, userImageUrl: doc.data().userImageUrl }))
+        const items = snapshot.docs.map(doc => ({
+             id: doc.id,
+             ...doc.data(),
+             userImageUrl: doc.data().userImageUrl
+         })) as FirestoreMenuItem[];
         setMenuItems(items);
         setIsLoadingItems(false);
     }, (error) => {
