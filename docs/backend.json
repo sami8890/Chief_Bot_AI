@@ -1,0 +1,292 @@
+{
+  "entities": {
+    "Restaurant": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Restaurant",
+      "type": "object",
+      "description": "Represents a restaurant within the GastronomicAI application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Restaurant entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the restaurant."
+        },
+        "address": {
+          "type": "string",
+          "description": "The physical address of the restaurant."
+        },
+        "contactNumber": {
+          "type": "string",
+          "description": "The contact phone number of the restaurant."
+        },
+        "openingHours": {
+          "type": "string",
+          "description": "The opening hours of the restaurant."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "address",
+        "contactNumber",
+        "openingHours"
+      ]
+    },
+    "MenuItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MenuItem",
+      "type": "object",
+      "description": "Represents a menu item offered by a restaurant.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MenuItem entity."
+        },
+        "restaurantId": {
+          "type": "string",
+          "description": "Reference to the Restaurant that offers this menu item. (Relationship: Restaurant 1:N MenuItem)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the menu item."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the menu item."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the menu item."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL for a default image of the menu item."
+        },
+        "userImageUrl": {
+          "type": "string",
+          "description": "URL for user added image of the menu item."
+        }
+      },
+      "required": [
+        "id",
+        "restaurantId",
+        "name",
+        "description",
+        "price"
+      ]
+    },
+    "DietaryRestriction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DietaryRestriction",
+      "type": "object",
+      "description": "Represents a dietary restriction that can be applied to menu items.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DietaryRestriction entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the dietary restriction (e.g., Vegetarian, Gluten-Free)."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "MenuItemDietaryRestriction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MenuItemDietaryRestriction",
+      "type": "object",
+      "description": "Represents the relationship between MenuItems and DietaryRestrictions (N:N).",
+      "properties": {
+        "menuItemId": {
+          "type": "string",
+          "description": "Reference to a MenuItem. (Relationship: MenuItem N:N DietaryRestriction)"
+        },
+        "dietaryRestrictionId": {
+          "type": "string",
+          "description": "Reference to a DietaryRestriction. (Relationship: MenuItem N:N DietaryRestriction)"
+        }
+      },
+      "required": [
+        "menuItemId",
+        "dietaryRestrictionId"
+      ]
+    },
+    "UserPreference": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserPreference",
+      "type": "object",
+      "description": "Represents a user's dietary preferences and restrictions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserPreference entity."
+        },
+        "dietaryRestrictionIds": {
+          "type": "array",
+          "description": "References to DietaryRestrictions that the user adheres to. (Relationship: UserPreference 1:N DietaryRestriction)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Represents a review of a restaurant.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Review entity."
+        },
+        "restaurantId": {
+          "type": "string",
+          "description": "Reference to the Restaurant being reviewed. (Relationship: Restaurant 1:N Review)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The rating given to the restaurant (e.g., 1 to 5 stars)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Optional comments about the restaurant experience."
+        }
+      },
+      "required": [
+        "id",
+        "restaurantId",
+        "rating"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/restaurants/{restaurantId}",
+        "definition": {
+          "entityName": "Restaurant",
+          "schema": {
+            "$ref": "#/backend/entities/Restaurant"
+          },
+          "description": "Stores restaurant information. Includes restaurant 'id' as parameter.",
+          "params": [
+            {
+              "name": "restaurantId",
+              "description": "The unique identifier for the restaurant."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/restaurants/{restaurantId}/menu_items/{menuItemId}",
+        "definition": {
+          "entityName": "MenuItem",
+          "schema": {
+            "$ref": "#/backend/entities/MenuItem"
+          },
+          "description": "Stores menu items for a specific restaurant. Includes restaurant 'id' and menu item 'id' as parameter.",
+          "params": [
+            {
+              "name": "restaurantId",
+              "description": "The unique identifier for the restaurant."
+            },
+            {
+              "name": "menuItemId",
+              "description": "The unique identifier for the menu item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/dietary_restrictions/{dietaryRestrictionId}",
+        "definition": {
+          "entityName": "DietaryRestriction",
+          "schema": {
+            "$ref": "#/backend/entities/DietaryRestriction"
+          },
+          "description": "Stores dietary restriction information. Includes dietary restriction 'id' as parameter.",
+          "params": [
+            {
+              "name": "dietaryRestrictionId",
+              "description": "The unique identifier for the dietary restriction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/menu_item_dietary_restrictions/{menuItemDietaryRestrictionId}",
+        "definition": {
+          "entityName": "MenuItemDietaryRestriction",
+          "schema": {
+            "$ref": "#/backend/entities/MenuItemDietaryRestriction"
+          },
+          "description": "Stores the relationship between menu items and dietary restrictions. Includes composite 'id' as parameter.",
+          "params": [
+            {
+              "name": "menuItemDietaryRestrictionId",
+              "description": "The unique identifier for the menu item dietary restriction relationship (composite key)."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/preferences/{userPreferenceId}",
+        "definition": {
+          "entityName": "UserPreference",
+          "schema": {
+            "$ref": "#/backend/entities/UserPreference"
+          },
+          "description": "Stores user preference information. Includes user 'id' and preference 'id' as parameter.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "userPreferenceId",
+              "description": "The unique identifier for the user preference."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/restaurants/{restaurantId}/reviews/{reviewId}",
+        "definition": {
+          "entityName": "Review",
+          "schema": {
+            "$ref": "#/backend/entities/Review"
+          },
+          "description": "Stores reviews for a specific restaurant. Includes restaurant 'id' and review 'id' as parameter.",
+          "params": [
+            {
+              "name": "restaurantId",
+              "description": "The unique identifier for the restaurant."
+            },
+            {
+              "name": "reviewId",
+              "description": "The unique identifier for the review."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support the GastronomicAI application, emphasizing authorization independence, clarity, and scalability. It leverages denormalization to avoid hierarchical authorization dependencies and structural segregation for homogeneous security postures. Path-based ownership is used where appropriate, and membership maps are utilized for collaborative data access where necessary.\n\nRestaurants are stored in a top-level `restaurants` collection. MenuItems are stored in a subcollection under each restaurant, enabling efficient querying of a restaurant's menu. DietaryRestrictions are stored in a top-level collection, allowing for global management. The relationship between MenuItems and DietaryRestrictions is managed through a `menu_item_dietary_restrictions` collection.\n\nUserPreferences are stored under the user's document in the `users` collection, ensuring private user data. Reviews are stored as a subcollection under each restaurant.\n\n**Authorization Independence:**\n\n*   The design avoids `get()` calls in security rules by denormalizing authorization data. For example, if access to a MenuItem needs to be restricted to certain restaurant staff, the staff's UIDs would be stored in a `members` map within the Restaurant document, and this `members` map would be copied into each MenuItem document under that restaurant. This allows security rules for MenuItems to be evaluated without needing to read the parent Restaurant document.\n\n**QAPs (Rules are not Filters):**\n\n*   The structural segregation of data ensures that `list` operations are secure. For instance, storing user preferences under `/users/{userId}/preferences` allows listing preferences only for the authenticated user. Similarly, the `restaurants` collection can be queried globally without exposing private user data.\n\n**Image Integration:**\n\n*   Each menu item stores the URL for a default image (`imageUrl`) and an optional user-added image (`userImageUrl`), allowing users to customize the menu presentation.\n\n**Adding image from gallery:**\n\n*   The addition of a user image is supported by the field \"userImageUrl\" in MenuItem collection."
+  }
+}
