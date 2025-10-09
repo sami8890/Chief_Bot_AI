@@ -15,22 +15,25 @@ import {z} from 'genkit';
 const PersonalizedRecommendationsInputSchema = z.object({
   userPreferences: z
     .string()
-    .describe('The user\u2019s food preferences, likes, and dislikes.'),
+    .describe('The user’s food preferences, likes, and dislikes.'),
   dietaryNeeds: z
     .string()
     .describe(
-      'The user\u2019s dietary restrictions and needs, e.g., vegetarian, gluten-free.'
+      'The user’s dietary restrictions and needs, e.g., vegetarian, gluten-free.'
     ),
-  menu: z.string().describe('The restaurant\u2019s menu, including dish descriptions.'),
+  menu: z.string().describe('A markdown list of the restaurant’s menu dishes, used to constrain the recommendations. The AI should only recommend items from this list.'),
 });
 export type PersonalizedRecommendationsInput = z.infer<
   typeof PersonalizedRecommendationsInputSchema
 >;
 
 const PersonalizedRecommendationsOutputSchema = z.object({
-  recommendations: z
-    .string()
-    .describe('A list of personalized menu recommendations for the user.'),
+  recommendations: z.array(
+      z.object({
+          name: z.string().describe("The exact name of a dish from the provided menu."),
+          reasoning: z.string().describe("A brief explanation for why this dish is a good recommendation for the user."),
+      })
+  ).describe("A list of personalized menu recommendations for the user.")
 });
 export type PersonalizedRecommendationsOutput = z.infer<
   typeof PersonalizedRecommendationsOutputSchema
@@ -46,17 +49,19 @@ const prompt = ai.definePrompt({
   name: 'personalizedRecommendationsPrompt',
   input: {schema: PersonalizedRecommendationsInputSchema},
   output: {schema: PersonalizedRecommendationsOutputSchema},
-  prompt: `You are a restaurant sommelier who recommends dishes to patrons based on their preferences and dietary restrictions.
+  prompt: `You are a helpful and friendly restaurant sommelier. Your goal is to recommend a few dishes to a patron based on their preferences and dietary restrictions from the menu provided.
 
-  Consider the following information about the user:
-  User Preferences: {{{userPreferences}}}
-  Dietary Needs: {{{dietaryNeeds}}}
+  You MUST only recommend dishes that are explicitly listed in the Menu below. Do not invent dishes.
 
-  Consider the following menu from the restaurant:
-  Menu: {{{menu}}}
+  User Information:
+  - Preferences: {{{userPreferences}}}
+  - Dietary Needs: {{{dietaryNeeds}}}
 
-  Based on this information, what dishes would you recommend to the user? Explain why each dish is a good recommendation.
-  Format your response as a list of dish recommendations with explanations.
+  Menu:
+  {{{menu}}}
+
+  Based on this information, what dishes would you recommend to the user? For each dish, provide the exact name and a short, compelling reason why it's a good fit.
+  Format your response as a JSON object with a 'recommendations' array.
   `,
 });
 
