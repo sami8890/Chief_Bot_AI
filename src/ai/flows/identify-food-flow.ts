@@ -21,9 +21,19 @@ export type IdentifyFoodItemInput = z.infer<typeof IdentifyFoodItemInputSchema>;
 
 const IdentifyFoodItemOutputSchema = z.object({
   isFood: z.boolean().describe('Whether or not the image contains food.'),
-  foodName: z.string().describe('The name of the identified food item.'),
-  calories: z.string().describe('The estimated calorie count for the food item.'),
+  foodName: z
+    .string()
+    .describe('The most common, culturally specific name of the identified food item (e.g., "Biryani" not "Chicken and Pilaf Rice").'),
+  calories: z
+    .string()
+    .describe('An approximate calorie range for a typical serving of the food item (e.g., "400-600 kcal").'),
+  protein: z
+    .string()
+    .describe('The estimated protein in grams (e.g., "30g").'),
+  carbs: z.string().describe('The estimated carbohydrates in grams (e.g., "50g").'),
+  fats: z.string().describe('The estimated fats in grams (e.g., "20g").'),
 });
+
 export type IdentifyFoodItemOutput = z.infer<typeof IdentifyFoodItemOutputSchema>;
 
 export async function identifyFoodItem(
@@ -36,11 +46,14 @@ const prompt = ai.definePrompt({
   name: 'identifyFoodItemPrompt',
   input: {schema: IdentifyFoodItemInputSchema},
   output: {schema: IdentifyFoodItemOutputSchema},
-  prompt: `You are an expert nutritionist. Your task is to identify the food item in the provided image and estimate its calorie count.
+  prompt: `You are an expert nutritionist. Your task is to identify the food item in the provided image and estimate its nutritional information for a typical serving size.
 
 If the image does not contain food, set the 'isFood' flag to false and provide appropriate values for the other fields.
 
-Analyze the image and provide the name of the food and its estimated calories.
+Analyze the image and provide the following:
+1.  The most common and culturally specific name for the dish. For example, use "Biryani" instead of a generic description like "Chicken and Pilaf Rice".
+2.  An estimated calorie range (e.g., "400-600 kcal").
+3.  Estimated protein, carbohydrates, and fats in grams.
 
 Photo: {{media url=photoDataUri}}`,
 });
@@ -56,3 +69,5 @@ const identifyFoodItemFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
