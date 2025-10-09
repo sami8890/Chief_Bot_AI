@@ -15,7 +15,7 @@ import {
 import { analyzeMenuItemDescription, type AnalyzeMenuItemDescriptionOutput } from '@/ai/flows/analyze-menu-item-descriptions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, GlassWater } from 'lucide-react';
 
 export function MenuAnalyzer({ menuItemDescription }: { menuItemDescription: string }) {
   const [analysis, setAnalysis] = useState<AnalyzeMenuItemDescriptionOutput | null>(null);
@@ -52,7 +52,7 @@ export function MenuAnalyzer({ menuItemDescription }: { menuItemDescription: str
             Menu Item Analysis
           </DialogTitle>
           <DialogDescription>
-            AI-powered breakdown of ingredients, allergens, and nutritional info.
+            AI-powered breakdown of ingredients, allergens, and wine pairings.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-6">
@@ -75,6 +75,16 @@ export function MenuAnalyzer({ menuItemDescription }: { menuItemDescription: str
                     <p className="text-muted-foreground">None detected.</p>
                   )}
                 </div>
+              </div>
+               <div>
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <GlassWater className="w-4 h-4 text-accent" />
+                  AI Sommelier Suggests
+                </h4>
+                 <div className="pl-6 border-l-2 border-accent/50">
+                    <p className="font-semibold text-primary">{analysis.winePairing.recommendation}</p>
+                    <p className="text-muted-foreground">{analysis.winePairing.reasoning}</p>
+                 </div>
               </div>
               <div>
                 <h4 className="font-semibold mb-2">Nutritional Summary</h4>
@@ -111,6 +121,10 @@ function AnalysisSkeleton() {
                 <div className="flex flex-wrap gap-2">
                     <Skeleton className="h-6 w-20" />
                 </div>
+            </div>
+             <div>
+                <Skeleton className="h-5 w-48 mb-2" />
+                <Skeleton className="h-12 w-full" />
             </div>
             <div>
                 <Skeleton className="h-5 w-48 mb-2" />

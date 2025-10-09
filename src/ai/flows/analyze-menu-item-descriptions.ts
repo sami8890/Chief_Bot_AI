@@ -29,6 +29,12 @@ const AnalyzeMenuItemDescriptionOutputSchema = z.object({
   nutritionalInformation: z
     .string()
     .describe('Summary of nutritional information for the menu item.'),
+  winePairing: z
+    .object({
+      recommendation: z.string().describe('The name or type of wine recommended.'),
+      reasoning: z.string().describe('A brief explanation for why this wine is a good pairing.'),
+    })
+    .describe('A wine pairing suggestion for the menu item.'),
 });
 export type AnalyzeMenuItemDescriptionOutput = z.infer<
   typeof AnalyzeMenuItemDescriptionOutputSchema
@@ -44,11 +50,11 @@ const prompt = ai.definePrompt({
   name: 'analyzeMenuItemDescriptionPrompt',
   input: {schema: AnalyzeMenuItemDescriptionInputSchema},
   output: {schema: AnalyzeMenuItemDescriptionOutputSchema},
-  prompt: `You are a restaurant expert. Analyze the following menu item description to extract key ingredients, allergens, and nutritional information.  Be concise and accurate.
+  prompt: `You are a restaurant expert and sommelier. Analyze the following menu item description to extract key ingredients, allergens, and nutritional information. Also, provide a thoughtful wine pairing recommendation with a brief reason. Be concise and accurate.
 
 Menu Item Description: {{{menuItemDescription}}}
 
-Output the ingredients, allergens, and nutritional information in JSON format.`,
+Output the ingredients, allergens, nutritional information, and wine pairing in JSON format.`,
 });
 
 const analyzeMenuItemDescriptionFlow = ai.defineFlow(
