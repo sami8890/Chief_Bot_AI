@@ -8,7 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { identifyFoodItem, type IdentifyFoodItemOutput } from '@/ai/flows/identify-food-flow';
-import { Upload, X, BrainCircuit, Flame, Utensils } from 'lucide-react';
+import { Upload, X, BrainCircuit, Flame, Utensils, AlertTriangle } from 'lucide-react';
+
+const SUPPORTED_MIME_TYPES = ['image/jpeg', 'image/png'];
+const MAX_FILE_SIZE_MB = 4;
 
 export function FoodIdentifier() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -20,15 +23,22 @@ export function FoodIdentifier() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 4 * 1024 * 1024) { // 4MB limit for Gemini
-        setError('Image is too large. Please upload an image smaller than 4MB.');
+      setError(null);
+      setAnalysis(null);
+
+      if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
+        setError('Invalid file type. Please upload a JPEG or PNG image.');
         return;
       }
+
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) { 
+        setError(`Image is too large. Please upload an image smaller than ${MAX_FILE_SIZE_MB}MB.`);
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setAnalysis(null);
-        setError(null);
       };
       reader.readAsDataURL(file);
     }
@@ -73,7 +83,7 @@ export function FoodIdentifier() {
             <CardTitle className="text-3xl font-headline">AI Calorie Scanner</CardTitle>
           </div>
           <CardDescription>
-            Curious about your meal? Upload a photo to identify the food and get an estimated calorie count.
+            Curious about your meal? Upload a photo (JPEG/PNG) to identify the food and get an estimated calorie count.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
@@ -91,7 +101,7 @@ export function FoodIdentifier() {
             >
               <Upload className="w-12 h-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Upload Your Food Photo</h3>
-              <p className="text-sm text-muted-foreground mb-4">Drag & drop an image or click to select a file.</p>
+              <p className="text-sm text-muted-foreground mb-4">Drag & drop a JPEG or PNG image or click to select a file.</p>
               <Button onClick={() => fileInputRef.current?.click()}>
                 Browse Files
               </Button>
@@ -119,7 +129,8 @@ export function FoodIdentifier() {
 
           {error && (
             <Alert variant="destructive" className="mt-4">
-              <AlertTitle>Analysis Failed</AlertTitle>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Upload Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
