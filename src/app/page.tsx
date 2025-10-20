@@ -2,9 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore } from '@/firebase';
 import type { MenuItem } from '@/lib/data';
-import { collection } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 import { Header } from '@/components/layout/header';
 import { Hero } from '@/components/hero';
