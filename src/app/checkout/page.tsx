@@ -337,8 +337,16 @@ export default function CheckoutPage() {
   const options: StripeElementsOptions = {
     clientSecret: clientSecret || undefined,
     appearance: {
-        theme: 'night',
-        labels: 'floating',
+        theme: 'stripe',
+        variables: {
+          colorPrimary: '#D3470A',
+          colorBackground: '#3c3c3c',
+          colorText: '#ffffff',
+          colorDanger: '#df1b41',
+          fontFamily: 'PT Sans, sans-serif',
+          spacingUnit: '4px',
+          borderRadius: '4px',
+        }
     },
   };
 
