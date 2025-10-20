@@ -78,24 +78,6 @@ export const dietaryOptions: string[] = [
 export const categories = ['Appetizers', 'Salads', 'Soups', 'Main Courses', 'Desserts'];
 
 
-export const testimonials: Testimonial[] = [
-  {
-    quote:
-      'An absolute gem! The food was exquisite, the service was impeccable, and the atmosphere was cozy and inviting. The Mushroom Risotto is a must-try!',
-    author: 'Jessica Miller',
-  },
-  {
-    quote:
-      'I came here for a special occasion and ChefBot exceeded all my expectations. The personalized recommendations were spot on. A truly 5-star experience.',
-    author: 'David Chen',
-  },
-  {
-    quote:
-      'As a vegan, it’s often hard to find exciting options, but this place is a dream. The Golden Quinoa Salad was fresh and bursting with flavor. I’ll be back!',
-    author: 'Sarah Jenkins',
-  },
-];
-
 export const galleryImageIds: string[] = [
   'gallery-1',
   'gallery-2',

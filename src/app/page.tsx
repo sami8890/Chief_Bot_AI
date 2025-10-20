@@ -10,9 +10,8 @@ import { Header } from '@/components/layout/header';
 import { Hero } from '@/components/hero';
 import { RestaurantInfo } from '@/components/restaurant-info';
 import { MenuWrapper } from '@/components/menu/menu-wrapper';
-import { restaurantInfo, testimonials, galleryImageIds, dietaryOptions } from '@/lib/data';
+import { restaurantInfo, galleryImageIds, dietaryOptions } from '@/lib/data';
 import { Footer } from '@/components/layout/footer';
-import { Testimonials } from '@/components/testimonials';
 import { Gallery } from '@/components/gallery';
 import { FoodIdentifier } from '@/components/food-identifier';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -81,8 +80,6 @@ export default function Home() {
           ) : (
              <MenuWrapper menuItems={menuItems} dietaryOptions={dietaryOptions} />
           )}
-          <div className="my-16" />
-          <Testimonials testimonials={testimonials} />
           <div className="my-16" />
           <Gallery imageIds={galleryImageIds} />
           <div className="my-16" />
