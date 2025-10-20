@@ -29,7 +29,8 @@ export default function Home() {
       return;
     };
     setIsLoading(true);
-    const menuCollectionRef = collection(firestore, "menu_items");
+    // Correctly point to the subcollection within a specific restaurant document
+    const menuCollectionRef = collection(firestore, "restaurants", "main-restaurant", "menu_items");
 
     const unsubscribe = onSnapshot(menuCollectionRef, (snapshot) => {
         const items = snapshot.docs.map(doc => {
