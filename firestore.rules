@@ -4,44 +4,51 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user is the designated admin
-    function isAdmin() {
-      return request.auth != null && request.auth.token.email == "admin@gastronomic.ai";
+    // Helper function to check if a user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    // Helper function to check if the user is the owner of the data
+    // Helper function to check if a user owns a document
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
 
-    // USERS:
-    // - Authenticated users can read their own profile.
-    // - Admin can read any user profile.
-    // - Authenticated users can update their own profile.
-    // - Admin can update any user profile.
+    // Users can read/write their own user document
     match /users/{userId} {
-      allow read, update: if isOwner(userId) || isAdmin();
-      allow create: if request.auth != null; // Any authenticated user can create their own profile
+      allow read, write: if isOwner(userId);
     }
-
-    // MENU ITEMS:
-    // - Anyone can read the menu.
-    // - Only admin can create, update, or delete menu items.
-    match /menu_items/{menuItemId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // ORDERS:
-    // - Authenticated users can create orders for themselves.
-    // - Users can read their own orders.
-    // - Admin can read and update any order (e.g., to change status).
+    
+    // Logged in users can create their own orders
     match /orders/{orderId} {
-      allow create: if isOwner(request.resource.data.userId);
-      allow read, update: if isOwner(resource.data.userId) || isAdmin();
-      // No delete for orders to maintain history
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+    }
+
+    // Restaurants and their menus should be publicly readable
+    match /restaurants/{restaurantId} {
+      allow read: if true;
+      // Write access should be restricted to admins (future implementation)
+      allow write: if false;
+
+      match /menu_items/{menuItemId} {
+        allow read: if true;
+        // Write access should be restricted to admins (future implementation)
+        allow write: if false;
+      }
+
+      match /reviews/{reviewId} {
+         // Anyone can read reviews
+        allow read: if true;
+        // Only authenticated users can create reviews for themselves
+        allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      }
+    }
+
+    // Dietary restrictions should be publicly readable
+    match /dietary_restrictions/{dietaryRestrictionId} {
+      allow read: if true;
+       // Write access should be restricted to admins (future implementation)
+      allow write: if false;
     }
   }
 }
-
-    

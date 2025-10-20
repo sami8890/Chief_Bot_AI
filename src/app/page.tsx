@@ -2,9 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useMemoFirebase } from '@/firebase';
 import type { MenuItem } from '@/lib/data';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, FirestoreError } from 'firebase/firestore';
 
 import { Header } from '@/components/layout/header';
 import { Hero } from '@/components/hero';
@@ -15,6 +15,8 @@ import { Footer } from '@/components/layout/footer';
 import { Gallery } from '@/components/gallery';
 import { FoodIdentifier } from '@/components/food-identifier';
 import { Skeleton } from '@/components/ui/skeleton';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 
 export default function Home() {
@@ -23,14 +25,19 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const firestore = useFirestore();
 
+  const menuCollectionRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, "restaurants", "main-restaurant", "menu_items");
+  }, [firestore]);
+
+
   useEffect(() => {
-    if (!firestore) {
-      console.log("Firestore not available yet");
+    if (!menuCollectionRef) {
+      // Firestore is not available yet.
+      // We'll wait for the ref to be initialized.
       return;
     };
     setIsLoading(true);
-    // Correctly point to the subcollection within a specific restaurant document
-    const menuCollectionRef = collection(firestore, "restaurants", "main-restaurant", "menu_items");
 
     const unsubscribe = onSnapshot(menuCollectionRef, (snapshot) => {
         const items = snapshot.docs.map(doc => {
@@ -48,13 +55,23 @@ export default function Home() {
          });
         setMenuItems(items);
         setIsLoading(false);
-    }, (error) => {
-        console.error("Failed to fetch menu items: ", error);
-        setIsLoading(false);
+    }, (err: FirestoreError) => {
+        // This is the correct, contextual error handling implementation.
+        const contextualError = new FirestorePermissionError({
+          operation: 'list',
+          path: menuCollectionRef.path,
+        });
+
+        // Emit the error to be caught by the global error boundary.
+        // DO NOT use console.error here.
+        errorEmitter.emit('permission-error', contextualError);
+
+        setIsLoading(false); // Stop loading, as an error has occurred.
+        setMenuItems([]); // Ensure menu is empty on error.
     });
 
     return () => unsubscribe();
-  }, [firestore]);
+  }, [menuCollectionRef]);
 
 
   return (
