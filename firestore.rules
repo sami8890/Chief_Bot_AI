@@ -3,30 +3,45 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Allow public read-only access to menu items
+
+    // Helper function to check if a user is the designated admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == "admin@gastronomic.ai";
+    }
+
+    // Helper function to check if the user is the owner of the data
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // USERS:
+    // - Authenticated users can read their own profile.
+    // - Admin can read any user profile.
+    // - Authenticated users can update their own profile.
+    // - Admin can update any user profile.
+    match /users/{userId} {
+      allow read, update: if isOwner(userId) || isAdmin();
+      allow create: if request.auth != null; // Any authenticated user can create their own profile
+    }
+
+    // MENU ITEMS:
+    // - Anyone can read the menu.
+    // - Only admin can create, update, or delete menu items.
     match /menu_items/{menuItemId} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.email == resource.data.adminEmail; 
+      allow write: if isAdmin();
     }
-    
-    // Allow authenticated users to create their own orders
+
+    // ORDERS:
+    // - Authenticated users can create orders for themselves.
+    // - Users can read their own orders.
+    // - Admin can read and update any order (e.g., to change status).
     match /orders/{orderId} {
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow read, write: if request.auth != null && request.auth.token.email == resource.data.adminEmail;
-    }
-    
-    // Allow users to read their own user document, and admin to read any.
-    match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.token.email == resource.data.adminEmail;
-    }
-    
-    // Default deny all other collections
-    match /{document=**} {
-      allow read, write: if request.auth != null && request.auth.token.email == resource.data.adminEmail;
+      allow create: if isOwner(request.resource.data.userId);
+      allow read, update: if isOwner(resource.data.userId) || isAdmin();
+      // No delete for orders to maintain history
     }
   }
 }
+
+    

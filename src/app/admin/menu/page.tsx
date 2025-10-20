@@ -6,11 +6,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useFirestore } from '@/firebase';
-import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { dietaryOptions, categories } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { localMenuItems } from '@/lib/dummy-data';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
@@ -91,6 +92,29 @@ export default function MenuAdminPage() {
   const firestore = useFirestore();
   const storage = getStorage();
 
+  const seedDatabase = async () => {
+      if (!firestore) return;
+      toast({ title: "Welcome!", description: "Seeding database with starter menu items..." });
+      const batch = writeBatch(firestore);
+      const menuCollectionRef = collection(firestore, "menu_items");
+
+      localMenuItems.forEach((item) => {
+        // We don't need to specify an ID, Firestore will generate one.
+        const { id, ...itemData } = item;
+        const docRef = doc(menuCollectionRef); // Creates a new doc with a generated ID
+        batch.set(docRef, itemData);
+      });
+      
+      try {
+        await batch.commit();
+        toast({ title: "Success", description: "Starter menu has been added." });
+      } catch (error) {
+        console.error("Error seeding database: ", error);
+        toast({ title: "Error", description: "Could not seed database.", variant: "destructive" });
+      }
+  }
+
+
   useEffect(() => {
     if (!firestore) return;
     const menuCollectionRef = collection(firestore, "menu_items");
@@ -108,7 +132,13 @@ export default function MenuAdminPage() {
                  userImageUrl: data.userImageUrl,
              } as MenuItem;
          });
-        setMenuItems(items);
+
+        if (items.length === 0 && !isLoadingItems) {
+            seedDatabase();
+        } else {
+            setMenuItems(items);
+        }
+
         setIsLoadingItems(false);
     }, (error) => {
         const contextualError = new FirestorePermissionError({
@@ -120,7 +150,8 @@ export default function MenuAdminPage() {
         setIsLoadingItems(false);
     });
     return () => unsubscribe();
-  }, [firestore, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firestore]);
 
   const form = useForm<MenuItemFormValues>({
     resolver: zodResolver(menuItemSchema),
@@ -360,6 +391,12 @@ export default function MenuAdminPage() {
                         </TableBody>
                     </Table>
                 )}
+                 { !isLoadingItems && menuItems.length === 0 && (
+                    <div className="text-center p-8">
+                        <p className="mb-4">Your menu is empty. Would you like to add some starter dishes?</p>
+                        <Button onClick={seedDatabase}>Seed Menu</Button>
+                    </div>
+                 )}
             </CardContent>
         </Card>
 
@@ -525,3 +562,5 @@ export default function MenuAdminPage() {
     </div>
   );
 }
+
+    
