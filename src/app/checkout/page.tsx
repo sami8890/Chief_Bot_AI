@@ -239,7 +239,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
                     <AlertTriangle className="h-4 w-4" />
                     <AlertTitle>Important Notice</AlertTitle>
                     <AlertDescription>
-                      This is a demo website created by sami-e. Please do not use your actual card information.
+                      This is a demo website created by sami-e, but it is completely workable. Please do not use your actual card information.
                     </AlertDescription>
                   </Alert>
                   <div className="p-4 border rounded-md bg-muted/20">
