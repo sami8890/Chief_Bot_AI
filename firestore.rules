@@ -1,54 +1,30 @@
-
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Helper function to check if a user owns a document
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
-    // Users can read/write their own user document
+    // Users can only read and write their own data.
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
-    // Logged in users can create their own orders
+
+    // Orders can be created by authenticated users for themselves.
+    // Reading/updating orders should be restricted (e.g., to admins or the user).
+    // For now, only allowing create.
     match /orders/{orderId} {
-      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read, update, delete: if false; // Protect order data
     }
 
-    // Restaurants and their menus should be publicly readable
-    match /restaurants/{restaurantId} {
+    // Public read access for all restaurant-related data, including menus.
+    // Writes should be restricted (e.g., to admins).
+    match /restaurants/{path=**} {
       allow read: if true;
-      // Write access should be restricted to admins (future implementation)
-      allow write: if false;
-
-      match /menu_items/{menuItemId} {
-        allow read: if true;
-        // Write access should be restricted to admins (future implementation)
-        allow write: if false;
-      }
-
-      match /reviews/{reviewId} {
-         // Anyone can read reviews
-        allow read: if true;
-        // Only authenticated users can create reviews for themselves
-        allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
-      }
+      allow write: if false; // Protect restaurant data from public writes
     }
 
-    // Dietary restrictions should be publicly readable
-    match /dietary_restrictions/{dietaryRestrictionId} {
-      allow read: if true;
-       // Write access should be restricted to admins (future implementation)
-      allow write: if false;
+    // Default deny all other reads/writes
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
