@@ -39,7 +39,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex h-16 items-center border-b px-6">
             <Link href="/admin" className="flex items-center gap-2 font-semibold">
               <UtensilsCrossed className="h-6 w-6 text-primary" />
-              <span>GastronomicAI</span>
+              <span>ChefBot</span>
             </Link>
           </div>
           <div className="flex-1 overflow-auto py-2">
@@ -78,7 +78,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               <nav className="grid gap-6 text-lg font-medium">
                 <Link href="/admin" className="flex items-center gap-2 font-semibold text-xl">
                   <UtensilsCrossed className="h-7 w-7 text-primary" />
-                  <span>GastronomicAI</span>
+                  <span>ChefBot</span>
                 </Link>
                 {navItems.map(item => (
                   <NavItem key={item.href} {...item} />

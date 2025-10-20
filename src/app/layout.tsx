@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
@@ -7,7 +8,7 @@ import { ThemeProvider } from 'next-themes';
 
 
 export const metadata: Metadata = {
-  title: 'GastronomicAI',
+  title: 'ChefBot',
   description: 'AI-powered restaurant menu assistant',
 };
 

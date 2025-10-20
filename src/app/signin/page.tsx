@@ -77,7 +77,7 @@ export default function SignInPage() {
                             <Link href="/" className="flex items-center gap-2 text-foreground">
                                 <UtensilsCrossed className="w-6 h-6 text-primary" />
                                 <h1 className="text-2xl font-bold font-headline tracking-tight">
-                                    GastronomicAI
+                                    ChefBot
                                 </h1>
                             </Link>
                         </div>

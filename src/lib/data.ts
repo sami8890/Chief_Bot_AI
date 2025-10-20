@@ -54,7 +54,7 @@ export type Testimonial = {
 };
 
 export const restaurantInfo: RestaurantInfoType = {
-  name: 'GastronomicAI Bistro',
+  name: 'ChefBot Bistro',
   address: '123 Culinary Lane, Foodie City, 10101',
   contact: '(555) 123-4567',
   openingHours: [
@@ -85,7 +85,7 @@ export const testimonials: Testimonial[] = [
   },
   {
     quote:
-      'I came here for a special occasion and GastronomicAI exceeded all my expectations. The personalized recommendations were spot on. A truly 5-star experience.',
+      'I came here for a special occasion and ChefBot exceeded all my expectations. The personalized recommendations were spot on. A truly 5-star experience.',
     author: 'David Chen',
   },
   {
