@@ -37,12 +37,7 @@ export default function SignInPage() {
                 title: "Signed In",
                 description: "Welcome back! You have successfully signed in.",
             });
-            const userIsAdmin = email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-            if (userIsAdmin) {
-                router.push("/admin");
-            } else {
-                router.push("/");
-            }
+            router.push("/");
         } catch (error: any) {
             console.error("Sign in error:", error);
             let errorMessage = "An unexpected error occurred. Please try again.";
