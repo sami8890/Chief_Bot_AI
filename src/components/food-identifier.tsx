@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { identifyFoodItem, type IdentifyFoodItemOutput } from '@/ai/flows/identify-food-flow';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Upload, X, BrainCircuit, Flame, Utensils, AlertTriangle, Camera, Image as ImageIcon, Sparkles, User, FileUp, CreditCard } from 'lucide-react';
+import { Upload, X, BrainCircuit, Flame, Utensils, AlertTriangle, Camera, Image as ImageIcon, Sparkles, User, FileUp, CreditCard, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -114,7 +115,7 @@ export function FoodIdentifier() {
       setImagePreview(result);
       handleIdentify(result);
     };
-    reader.readAsDataURL(file);
+    reader.readDataURL(file);
   }
 
   const handleCapture = () => {
@@ -160,6 +161,24 @@ export function FoodIdentifier() {
       setIsLoading(false);
     }
   };
+
+  const handleAddCredits = async () => {
+      if (!user || !firestore || userData === null) return;
+      try {
+        const userRef = doc(firestore, "users", user.uid);
+        const newCredits = Math.min(10, (userData.scanCredits || 0) + 10);
+        await updateDoc(userRef, {
+            scanCredits: newCredits
+        });
+        toast({
+            title: "Credits Added",
+            description: "10 credits have been added to your account."
+        });
+      } catch (e) {
+          toast({ variant: 'destructive', title: "Error", description: "Could not add credits."})
+          console.error(e);
+      }
+  }
 
   const clearState = (isSwitchingMode = false) => {
     setImagePreview(null);
@@ -223,12 +242,18 @@ export function FoodIdentifier() {
                  {isUserDataLoading ? (
                     <Skeleton className="h-8 w-24" />
                  ) : (
-                    <div className="text-right">
-                       {scanCredits !== null ? (
-                         <p className="text-2xl font-bold">{scanCredits}<span className="text-base font-normal text-muted-foreground">/10</span></p>
-                       ) : (
-                         <p className="text-sm text-muted-foreground">N/A</p>
-                       )}
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={handleAddCredits}>
+                            <PlusCircle className="mr-2 h-4 w-4"/>
+                            Buy Credits
+                        </Button>
+                        <div className="text-right">
+                        {scanCredits !== null ? (
+                            <p className="text-2xl font-bold">{scanCredits}<span className="text-base font-normal text-muted-foreground">/10</span></p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">N/A</p>
+                        )}
+                        </div>
                     </div>
                  )}
             </CardContent>
@@ -424,4 +449,6 @@ function AnalysisSkeleton() {
       </div>
     )
 }
+    
+
     
