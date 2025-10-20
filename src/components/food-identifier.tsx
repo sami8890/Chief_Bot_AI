@@ -17,6 +17,14 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import type { Customer } from '@/lib/data';
 import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 const SUPPORTED_MIME_TYPES = ['image/jpeg', 'image/png'];
 const MAX_FILE_SIZE_MB = 4;
@@ -30,6 +38,8 @@ export function FoodIdentifier() {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'upload' | 'webcam'>('upload');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -49,7 +59,7 @@ export function FoodIdentifier() {
   const { data: userData, isLoading: isUserDataLoading } = useDoc<Customer>(userDocRef);
 
   const scanCredits = userData?.scanCredits ?? null;
-  const canScan = scanCredits !== null && scanCredits > 0;
+  const canScan = user && scanCredits !== null && scanCredits > 0;
 
   useEffect(() => {
     if (mode === 'webcam' && hasCameraPermission === null) {
@@ -87,8 +97,24 @@ export function FoodIdentifier() {
       }
     };
 
+  const handleAuthCheck = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return false;
+    }
+     if (!canScan) {
+        toast({
+          variant: 'destructive',
+          title: 'No Credits Remaining',
+          description: 'You have used all your free scan credits. Please purchase more to continue.',
+        });
+        return false;
+    }
+    return true;
+  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!handleAuthCheck()) return;
     const file = event.target.files?.[0];
     if (file) {
       processFile(file);
@@ -119,6 +145,7 @@ export function FoodIdentifier() {
   }
 
   const handleCapture = () => {
+    if (!handleAuthCheck()) return;
     if (!videoRef.current || !canvasRef.current) return;
     
     const video = videoRef.current;
@@ -136,7 +163,7 @@ export function FoodIdentifier() {
   }
 
   const handleIdentify = async (imageDataUri: string) => {
-    if (!imageDataUri || !user || !firestore || !canScan) return;
+    if (!imageDataUri || !user || !firestore) return;
     
     setIsLoading(true);
     setError(null);
@@ -148,7 +175,6 @@ export function FoodIdentifier() {
         setError("That's an interesting object! But it doesn't look like food to me. Try another angle or a different item.");
       } else {
         setAnalysis(result);
-        // Deduct credit
         const userRef = doc(firestore, "users", user.uid);
         await updateDoc(userRef, {
             scanCredits: increment(-1)
@@ -200,10 +226,7 @@ export function FoodIdentifier() {
   }
 
   const handleExampleClick = (imageId: string) => {
-    if (!canScan) {
-         toast({ variant: 'destructive', title: 'No credits left', description: 'You have used all your scanning credits.' });
-         return;
-    }
+    if (!handleAuthCheck()) return;
     const image = PlaceHolderImages.find(p => p.id === imageId);
     if(image) {
       setImagePreview(image.imageUrl);
@@ -211,25 +234,9 @@ export function FoodIdentifier() {
     }
   }
 
-  const renderContent = () => {
-    if (isUserLoading) {
-      return <div className="flex items-center justify-center p-8"><Skeleton className="w-48 h-8" /></div>;
-    }
-
-    if (!user) {
-      return (
-          <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Sign in to start scanning</AlertTitle>
-              <AlertDescription>
-                Please <Link href="/signin" className="font-bold underline">sign in</Link> or <Link href="/signup" className="font-bold underline">create an account</Link> to use the AI Calorie Scanner.
-              </AlertDescription>
-          </Alert>
-      )
-    }
-
+  const renderCreditInfo = () => {
+    if (isUserLoading || !user) return null;
     return (
-      <>
         <Card className="mb-6">
             <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -258,173 +265,191 @@ export function FoodIdentifier() {
                  )}
             </CardContent>
         </Card>
-
-        {!canScan && !isUserDataLoading && (
-            <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>No Credits Remaining</AlertTitle>
-                <AlertDescription>
-                    You have used all your free scan credits. Please contact support to purchase more.
-                </AlertDescription>
-            </Alert>
-        )}
-
-        <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-8 items-start", !canScan && "opacity-50 pointer-events-none")}>
-          <div className="space-y-4">
-              <div className="flex justify-center gap-2 p-1 bg-muted rounded-lg">
-                <Button onClick={() => switchMode('upload')} variant={mode === 'upload' ? 'secondary' : 'ghost'} className="flex-1" disabled={!canScan}>
-                  <FileUp className="mr-2" /> Upload
-                </Button>
-                <Button onClick={() => switchMode('webcam')} variant={mode === 'webcam' ? 'secondary' : 'ghost'} className="flex-1" disabled={!canScan}>
-                  <Camera className="mr-2" /> Webcam
-                </Button>
-              </div>
-            {mode === 'upload' && !imagePreview && (
-              <div
-                className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-muted-foreground/30 rounded-lg text-center aspect-video"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                      e.preventDefault();
-                      if(e.dataTransfer.files) {
-                          processFile(e.dataTransfer.files[0]);
-                      }
-                  }}
-              >
-                <Upload className="w-12 h-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Upload Your Food Photo</h3>
-                <p className="text-sm text-muted-foreground mb-4">Drag & drop or click to browse (JPEG/PNG).</p>
-                <Button onClick={() => fileInputRef.current?.click()} disabled={!canScan}>
-                  Browse Files
-                </Button>
-                <Input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={handleFileChange}
-                  accept="image/png, image/jpeg"
-                  disabled={!canScan}
-                />
-              </div>
-            )}
-            {mode === 'webcam' && !imagePreview && (
-                <div className="relative w-full aspect-video rounded-md overflow-hidden border bg-muted flex items-center justify-center">
-                  <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
-                  <canvas ref={canvasRef} className="hidden" />
-                  {hasCameraPermission === false && (
-                      <div className="text-center text-destructive-foreground p-4">
-                        <AlertTriangle className="mx-auto mb-2" />
-                        <p>Camera access denied or unavailable.</p>
-                      </div>
-                  )}
-                  {hasCameraPermission && <Button onClick={handleCapture} className="absolute bottom-4 z-10" size="lg" disabled={!canScan}>Capture Photo</Button>}
-                </div>
-            )}
-            {imagePreview && (
-              <div className="relative w-full aspect-video rounded-md overflow-hidden border">
-                <Image src={imagePreview} alt="Food preview" layout="fill" objectFit="contain" />
-                <Button variant="destructive" size="icon" className="absolute top-2 right-2 z-10" onClick={() => clearState()}>
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-center md:text-left font-headline">Nutritional Analysis</h3>
-            {error && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Analysis Failed</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            {isLoading && <AnalysisSkeleton />}
-            {!isLoading && !analysis && !error && (
-              <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-muted-foreground/30 rounded-lg aspect-video">
-                <Sparkles className="w-12 h-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Awaiting Image</h3>
-                <p className="text-sm text-muted-foreground">Your food analysis will appear here.</p>
-              </div>
-            )}
-            {analysis && (
-              <div className="p-4 bg-muted/50 rounded-lg border space-y-4">
-                  <div className="flex items-center gap-4">
-                      <Utensils className="w-8 h-8 text-primary flex-shrink-0" />
-                      <div>
-                      <p className="text-sm text-muted-foreground">Identified Food</p>
-                      <p className="text-xl font-bold">{analysis.foodName}</p>
-                      </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                      <div className="p-3 bg-background rounded-lg border">
-                            <Flame className="w-6 h-6 text-accent mx-auto mb-1" />
-                            <p className="text-lg font-bold">{analysis.calories}</p>
-                            <p className="text-xs text-muted-foreground">Calories</p>
-                      </div>
-                        <div className="p-3 bg-background rounded-lg border">
-                            <User className="w-6 h-6 text-blue-400 mx-auto mb-1" />
-                            <p className="text-lg font-bold">{analysis.protein}</p>
-                            <p className="text-xs text-muted-foreground">Protein</p>
-                      </div>
-                        <div className="p-3 bg-background rounded-lg border">
-                            <ImageIcon className="w-6 h-6 text-orange-400 mx-auto mb-1" />
-                            <p className="text-lg font-bold">{analysis.carbs}</p>
-                            <p className="text-xs text-muted-foreground">Carbs</p>
-                      </div>
-                        <div className="p-3 bg-background rounded-lg border">
-                            <ImageIcon className="w-6 h-6 text-yellow-400 mx-auto mb-1" />
-                            <p className="text-lg font-bold">{analysis.fats}</p>
-                            <p className="text-xs text-muted-foreground">Fats</p>
-                      </div>
-                  </div>
-                    <Alert className="text-xs">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertTitle>Disclaimer</AlertTitle>
-                      <AlertDescription>
-                          This is an AI-generated estimate. Actual nutritional values may vary.
-                      </AlertDescription>
-                  </Alert>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className={cn("mt-12", !canScan && "opacity-50 pointer-events-none")}>
-              <h3 className="text-xl font-semibold text-center mb-4 font-headline">Or Try an Example</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {foodExamples.map(id => {
-                      const image = PlaceHolderImages.find(p => p.id === id);
-                      if (!image) return null;
-                      return (
-                          <button key={id} onClick={() => handleExampleClick(id)} className="relative aspect-video rounded-md overflow-hidden border group" disabled={!canScan}>
-                              <Image src={image.imageUrl} alt={image.description} layout="fill" objectFit="cover" />
-                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <p className="text-white font-bold">{image.description}</p>
-                              </div>
-                          </button>
-                      )
-                  })}
-              </div>
-        </div>
-      </>
     );
   }
 
+  const isUiDisabled = !canScan && !!user;
+
   return (
-    <section id="food-identifier" className="container mx-auto">
-      <Card className="w-full mx-auto overflow-hidden">
-        <CardHeader className="text-center">
-          <div className="flex justify-center items-center gap-2 mb-2">
-            <BrainCircuit className="w-8 h-8 text-primary" />
-            <CardTitle className="text-3xl font-headline">AI Calorie Scanner</CardTitle>
-          </div>
-          <CardDescription>
-            Curious about your meal? Use your camera or upload a photo to get an AI-powered nutritional estimate.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
-          {renderContent()}
-        </CardContent>
-      </Card>
-    </section>
+    <>
+      <section id="food-identifier" className="container mx-auto">
+        <Card className="w-full mx-auto overflow-hidden">
+          <CardHeader className="text-center">
+            <div className="flex justify-center items-center gap-2 mb-2">
+              <BrainCircuit className="w-8 h-8 text-primary" />
+              <CardTitle className="text-3xl font-headline">AI Calorie Scanner</CardTitle>
+            </div>
+            <CardDescription>
+              Curious about your meal? Use your camera or upload a photo to get an AI-powered nutritional estimate.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            {renderCreditInfo()}
+
+            {isUiDisabled && (
+                <Alert variant="destructive" className="mb-6">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>No Credits Remaining</AlertTitle>
+                    <AlertDescription>
+                        You have used all your free scan credits. Please purchase more to continue.
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-8 items-start", isUiDisabled && "opacity-50 pointer-events-none")}>
+              <div className="space-y-4">
+                  <div className="flex justify-center gap-2 p-1 bg-muted rounded-lg">
+                    <Button onClick={() => switchMode('upload')} variant={mode === 'upload' ? 'secondary' : 'ghost'} className="flex-1">
+                      <FileUp className="mr-2" /> Upload
+                    </Button>
+                    <Button onClick={() => switchMode('webcam')} variant={mode === 'webcam' ? 'secondary' : 'ghost'} className="flex-1">
+                      <Camera className="mr-2" /> Webcam
+                    </Button>
+                  </div>
+                {mode === 'upload' && !imagePreview && (
+                  <div
+                    className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-muted-foreground/30 rounded-lg text-center aspect-video"
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                          e.preventDefault();
+                          if (!handleAuthCheck()) return;
+                          if(e.dataTransfer.files) {
+                              processFile(e.dataTransfer.files[0]);
+                          }
+                      }}
+                  >
+                    <Upload className="w-12 h-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Upload Your Food Photo</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Drag & drop or click to browse (JPEG/PNG).</p>
+                    <Button onClick={() => fileInputRef.current?.click()}>
+                      Browse Files
+                    </Button>
+                    <Input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      onChange={handleFileChange}
+                      accept="image/png, image/jpeg"
+                    />
+                  </div>
+                )}
+                {mode === 'webcam' && !imagePreview && (
+                    <div className="relative w-full aspect-video rounded-md overflow-hidden border bg-muted flex items-center justify-center">
+                      <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+                      <canvas ref={canvasRef} className="hidden" />
+                      {hasCameraPermission === false && (
+                          <div className="text-center text-destructive-foreground p-4">
+                            <AlertTriangle className="mx-auto mb-2" />
+                            <p>Camera access denied or unavailable.</p>
+                          </div>
+                      )}
+                      {hasCameraPermission && <Button onClick={handleCapture} className="absolute bottom-4 z-10" size="lg">Capture Photo</Button>}
+                    </div>
+                )}
+                {imagePreview && (
+                  <div className="relative w-full aspect-video rounded-md overflow-hidden border">
+                    <Image src={imagePreview} alt="Food preview" layout="fill" objectFit="contain" />
+                    <Button variant="destructive" size="icon" className="absolute top-2 right-2 z-10" onClick={() => clearState()}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-center md:text-left font-headline">Nutritional Analysis</h3>
+                {error && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Analysis Failed</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                {isLoading && <AnalysisSkeleton />}
+                {!isLoading && !analysis && !error && (
+                  <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-muted-foreground/30 rounded-lg aspect-video">
+                    <Sparkles className="w-12 h-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Awaiting Image</h3>
+                    <p className="text-sm text-muted-foreground">Your food analysis will appear here.</p>
+                  </div>
+                )}
+                {analysis && (
+                  <div className="p-4 bg-muted/50 rounded-lg border space-y-4">
+                      <div className="flex items-center gap-4">
+                          <Utensils className="w-8 h-8 text-primary flex-shrink-0" />
+                          <div>
+                          <p className="text-sm text-muted-foreground">Identified Food</p>
+                          <p className="text-xl font-bold">{analysis.foodName}</p>
+                          </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                          <div className="p-3 bg-background rounded-lg border">
+                                <Flame className="w-6 h-6 text-accent mx-auto mb-1" />
+                                <p className="text-lg font-bold">{analysis.calories}</p>
+                                <p className="text-xs text-muted-foreground">Calories</p>
+                          </div>
+                            <div className="p-3 bg-background rounded-lg border">
+                                <User className="w-6 h-6 text-blue-400 mx-auto mb-1" />
+                                <p className="text-lg font-bold">{analysis.protein}</p>
+                                <p className="text-xs text-muted-foreground">Protein</p>
+                          </div>
+                            <div className="p-3 bg-background rounded-lg border">
+                                <ImageIcon className="w-6 h-6 text-orange-400 mx-auto mb-1" />
+                                <p className="text-lg font-bold">{analysis.carbs}</p>
+                                <p className="text-xs text-muted-foreground">Carbs</p>
+                          </div>
+                            <div className="p-3 bg-background rounded-lg border">
+                                <ImageIcon className="w-6 h-6 text-yellow-400 mx-auto mb-1" />
+                                <p className="text-lg font-bold">{analysis.fats}</p>
+                                <p className="text-xs text-muted-foreground">Fats</p>
+                          </div>
+                      </div>
+                        <Alert className="text-xs">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertTitle>Disclaimer</AlertTitle>
+                          <AlertDescription>
+                              This is an AI-generated estimate. Actual nutritional values may vary.
+                          </AlertDescription>
+                      </Alert>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className={cn("mt-12", isUiDisabled && "opacity-50 pointer-events-none")}>
+                  <h3 className="text-xl font-semibold text-center mb-4 font-headline">Or Try an Example</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {foodExamples.map(id => {
+                          const image = PlaceHolderImages.find(p => p.id === id);
+                          if (!image) return null;
+                          return (
+                              <button key={id} onClick={() => handleExampleClick(id)} className="relative aspect-video rounded-md overflow-hidden border group">
+                                  <Image src={image.imageUrl} alt={image.description} layout="fill" objectFit="cover" />
+                                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <p className="text-white font-bold">{image.description}</p>
+                                  </div>
+                              </button>
+                          )
+                      })}
+                  </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create an Account to Continue</DialogTitle>
+            <DialogDescription>
+              Sign up or sign in to start analyzing your meals and tracking your nutrition.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button asChild><Link href="/signup">Create Account</Link></Button>
+            <Button asChild variant="secondary"><Link href="/signin">Sign In</Link></Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
