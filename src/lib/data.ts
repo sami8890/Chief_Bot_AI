@@ -35,6 +35,7 @@ export type Customer = {
     name: string;
     email: string;
     joinedDate: string;
+    scanCredits?: number;
 }
 
 export type RestaurantInfoType = {
@@ -103,3 +104,5 @@ export const galleryImageIds: string[] = [
   'gallery-5',
   'gallery-6',
 ];
+
+    

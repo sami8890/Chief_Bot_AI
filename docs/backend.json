@@ -1,10 +1,47 @@
 {
   "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User (matches Firebase Auth UID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user."
+        },
+        "joinedDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time the user signed up."
+        },
+        "scanCredits": {
+          "type": "number",
+          "description": "The number of remaining calorie scans for the user.",
+          "default": 10
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "joinedDate",
+        "scanCredits"
+      ]
+    },
     "Restaurant": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Restaurant",
       "type": "object",
-      "description": "Represents a restaurant within the GastronomicAI application.",
+      "description": "Represents a restaurant within the ChefBot application.",
       "properties": {
         "id": {
           "type": "string",
@@ -72,7 +109,6 @@
       },
       "required": [
         "id",
-        "restaurantId",
         "name",
         "description",
         "price"
@@ -178,6 +214,22 @@
   },
   "firestore": {
     "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
       {
         "path": "/restaurants/{restaurantId}",
         "definition": {
@@ -287,6 +339,7 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support the GastronomicAI application, emphasizing authorization independence, clarity, and scalability. It leverages denormalization to avoid hierarchical authorization dependencies and structural segregation for homogeneous security postures. Path-based ownership is used where appropriate, and membership maps are utilized for collaborative data access where necessary.\n\nRestaurants are stored in a top-level `restaurants` collection. MenuItems are stored in a subcollection under each restaurant, enabling efficient querying of a restaurant's menu. DietaryRestrictions are stored in a top-level collection, allowing for global management. The relationship between MenuItems and DietaryRestrictions is managed through a `menu_item_dietary_restrictions` collection.\n\nUserPreferences are stored under the user's document in the `users` collection, ensuring private user data. Reviews are stored as a subcollection under each restaurant.\n\n**Authorization Independence:**\n\n*   The design avoids `get()` calls in security rules by denormalizing authorization data. For example, if access to a MenuItem needs to be restricted to certain restaurant staff, the staff's UIDs would be stored in a `members` map within the Restaurant document, and this `members` map would be copied into each MenuItem document under that restaurant. This allows security rules for MenuItems to be evaluated without needing to read the parent Restaurant document.\n\n**QAPs (Rules are not Filters):**\n\n*   The structural segregation of data ensures that `list` operations are secure. For instance, storing user preferences under `/users/{userId}/preferences` allows listing preferences only for the authenticated user. Similarly, the `restaurants` collection can be queried globally without exposing private user data.\n\n**Image Integration:**\n\n*   Each menu item stores the URL for a default image (`imageUrl`) and an optional user-added image (`userImageUrl`), allowing users to customize the menu presentation.\n\n**Adding image from gallery:**\n\n*   The addition of a user image is supported by the field \"userImageUrl\" in MenuItem collection."
+    "reasoning": "The Firestore structure is designed to support the ChefBot application, emphasizing authorization independence, clarity, and scalability. It leverages denormalization to avoid hierarchical authorization dependencies and structural segregation for homogeneous security postures. Path-based ownership is used where appropriate, and membership maps are utilized for collaborative data access where necessary.\n\nRestaurants are stored in a top-level `restaurants` collection. MenuItems are stored in a subcollection under each restaurant, enabling efficient querying of a restaurant's menu. DietaryRestrictions are stored in a top-level collection, allowing for global management. The relationship between MenuItems and DietaryRestrictions is managed through a `menu_item_dietary_restrictions` collection.\n\nUserPreferences are stored under the user's document in the `users` collection, ensuring private user data. Reviews are stored as a subcollection under each restaurant.\n\n**Authorization Independence:**\n\n*   The design avoids `get()` calls in security rules by denormalizing authorization data. For example, if access to a MenuItem needs to be restricted to certain restaurant staff, the staff's UIDs would be stored in a `members` map within the Restaurant document, and this `members` map would be copied into each MenuItem document under that restaurant. This allows security rules for MenuItems to be evaluated without needing to read the parent Restaurant document.\n\n**QAPs (Rules are not Filters):**\n\n*   The structural segregation of data ensures that `list` operations are secure. For instance, storing user preferences under `/users/{userId}/preferences` allows listing preferences only for the authenticated user. Similarly, the `restaurants` collection can be queried globally without exposing private user data.\n\n**Image Integration:**\n\n*   Each menu item stores the URL for a default image (`imageUrl`) and an optional user-added image (`userImageUrl`), allowing users to customize the menu presentation.\n\n**Adding image from gallery:**\n\n*   The addition of a user image is supported by the field \"userImageUrl\" in MenuItem collection."
   }
 }
+    

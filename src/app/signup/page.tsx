@@ -33,6 +33,12 @@ export default function SignUpPage() {
         setIsLoading(true);
         setError(null);
 
+        if (!firestore) {
+            setError("Could not connect to the database. Please try again later.");
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
@@ -45,6 +51,7 @@ export default function SignUpPage() {
                 name: name,
                 email: email,
                 joinedDate: new Date().toISOString(),
+                scanCredits: 10, // Initialize with 10 credits
             });
             
             toast({
@@ -142,3 +149,5 @@ export default function SignUpPage() {
         </div>
     );
 }
+
+    
