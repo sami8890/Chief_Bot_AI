@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -10,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { CheckCircle2, Home, Package } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
+
+export const dynamic = 'force-dynamic';
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
