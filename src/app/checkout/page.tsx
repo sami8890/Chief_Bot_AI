@@ -21,6 +21,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { createPaymentIntent, createOrder } from "./actions";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -233,10 +234,19 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
               />
 
               {paymentMethod === 'card' && (
-                <div className="p-4 border rounded-md bg-muted/20">
-                  <Label className="text-sm font-medium mb-2 block">Card Details</Label>
-                   {clientSecret ? <PaymentElement /> : <Loader2 className="w-6 h-6 animate-spin" />}
-                </div>
+                <>
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Important Notice</AlertTitle>
+                    <AlertDescription>
+                      This is a demo website created by sami-e. Please do not use your actual card information.
+                    </AlertDescription>
+                  </Alert>
+                  <div className="p-4 border rounded-md bg-muted/20">
+                    <Label className="text-sm font-medium mb-2 block">Card Details</Label>
+                     {clientSecret ? <PaymentElement /> : <Loader2 className="w-6 h-6 animate-spin" />}
+                  </div>
+                </>
               )}
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading || (paymentMethod === 'card' && (!stripe || !clientSecret))}>
