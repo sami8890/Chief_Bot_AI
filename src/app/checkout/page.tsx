@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,9 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) 
+  : null;
 
 const checkoutSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -71,13 +73,18 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
   const orderType = form.watch("orderType");
   const paymentMethod = form.watch("paymentMethod");
 
+  const isStripeConfigured = !!stripePromise;
+
+
   useEffect(() => {
-    if (paymentMethod === 'card' && !clientSecret) {
+    if (paymentMethod === 'card' && isStripeConfigured && !clientSecret) {
       setMessage("Initializing payment... please wait.");
+    } else if (paymentMethod === 'card' && !isStripeConfigured) {
+        setMessage("Online payment is currently unavailable. Please select Cash on Delivery.")
     } else {
       setMessage(null);
     }
-  }, [paymentMethod, clientSecret])
+  }, [paymentMethod, clientSecret, isStripeConfigured])
 
 
   async function onSubmit(data: CheckoutFormValues) {
@@ -219,10 +226,10 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
                     <FormLabel>Payment Method</FormLabel>
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4">
-                        <FormItem className="flex items-center space-x-3 space-y-0">
+                        {isStripeConfigured && <FormItem className="flex items-center space-x-3 space-y-0">
                           <FormControl><RadioGroupItem value="card" /></FormControl>
                           <FormLabel className="font-normal">Credit/Debit Card</FormLabel>
-                        </FormItem>
+                        </FormItem>}
                         <FormItem className="flex items-center space-x-3 space-y-0">
                           <FormControl><RadioGroupItem value="cod" /></FormControl>
                           <FormLabel className="font-normal">Cash on Delivery</FormLabel>
@@ -233,7 +240,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
                 )}
               />
 
-              {paymentMethod === 'card' && (
+              {paymentMethod === 'card' && isStripeConfigured && (
                 <>
                   <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
@@ -295,14 +302,15 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
   );
 }
 
-
-export default function CheckoutPage() {
+function CheckoutPageContents() {
   const { user, isUserLoading: isAuthLoading } = useUser();
   const { cart } = useCart();
   const router = useRouter();
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isLoadingSecret, setIsLoadingSecret] = useState(true);
+  
+  const isStripeConfigured = !!stripePromise;
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.08;
@@ -319,11 +327,13 @@ export default function CheckoutPage() {
   }, [user, isAuthLoading, cart, router]);
 
   useEffect(() => {
-    if (cart.length > 0 && total > 0.50) { // Stripe requires a minimum amount
+    if (isStripeConfigured && cart.length > 0 && total > 0.50) { // Stripe requires a minimum amount
       setIsLoadingSecret(true);
       createPaymentIntent(total)
         .then(secret => {
-          setClientSecret(secret);
+          if (secret) {
+            setClientSecret(secret);
+          }
         })
         .catch(err => {
             console.error("Failed to create payment intent", err);
@@ -334,7 +344,7 @@ export default function CheckoutPage() {
     } else if (cart.length > 0) {
         setIsLoadingSecret(false);
     }
-  }, [cart, total]);
+  }, [cart, total, isStripeConfigured]);
   
   if (isAuthLoading || !user || cart.length === 0) {
     return (
@@ -365,17 +375,29 @@ export default function CheckoutPage() {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl font-headline mb-8">Checkout</h1>
-        {isLoadingSecret ? (
+        {(isLoadingSecret && isStripeConfigured) ? (
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="w-8 h-8 animate-spin" />
             </div>
         ) : (
-            <Elements stripe={stripePromise} options={options}>
-              <CheckoutForm clientSecret={clientSecret} />
-            </Elements>
+            isStripeConfigured ? (
+              <Elements stripe={stripePromise} options={options}>
+                <CheckoutForm clientSecret={clientSecret} />
+              </Elements>
+            ) : (
+               <CheckoutForm clientSecret={null} />
+            )
         )}
       </main>
       <Footer />
     </div>
   );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+       <CheckoutPageContents />
+    </Suspense>
+  )
 }

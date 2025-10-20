@@ -34,6 +34,8 @@ const nextConfig: NextConfig = {
   },
    env: {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    // Note: NEXT_PUBLIC_ variables are exposed to the browser.
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   }
 };
 

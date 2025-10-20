@@ -11,6 +11,13 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
 export async function createPaymentIntent(amount: number) {
+  // Gracefully handle missing Stripe configuration
+  if (!stripe) {
+    console.error("Stripe is not configured. Skipping payment intent creation.");
+    // Return a value that can be handled by the client
+    return null;
+  }
+  
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Amount in cents
@@ -27,6 +34,7 @@ export async function createPaymentIntent(amount: number) {
     return paymentIntent.client_secret;
   } catch (error) {
     console.error('Error creating PaymentIntent:', error);
+    // Propagate a more generic error to the client
     throw new Error('Could not create payment intent.');
   }
 }
