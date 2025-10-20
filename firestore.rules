@@ -1,116 +1,32 @@
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    /**
-     * @description Grants public read access to restaurant information and restricts write access to authorized users.
-     * @path /restaurants/{restaurantId}
-     * @allow get, list: if true;
-     * @allow create: if request.auth != null; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Public read, owner-only writes.
-     */
-    match /restaurants/{restaurantId} {
-      allow get, list: if true;
-      allow create: if request.auth != null; // TODO: Add owner validation once the schema is updated with an ownership field.
-      allow update: if request.auth != null && request.auth.uid == resource.data.ownerId;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+  
+    // Allow public read-only access to menu items
+    match /menu_items/{menuItemId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == resource.data.adminEmail; 
     }
-
-    /**
-     * @description Grants read access to menu items to anyone and restricts write access to authorized restaurant staff.
-     * @path /restaurants/{restaurantId}/menu_items/{menuItemId}
-     * @allow get, list: if true;
-     * @allow create: if request.auth != null; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Public read, owner-only writes (inherited from restaurant).
-     */
-    match /restaurants/{restaurantId}/menu_items/{menuItemId} {
-      allow get, list: if true;
-      allow create: if request.auth != null; // TODO: Add owner validation once the schema is updated with an ownership field.
-      allow update: if request.auth != null && get(/databases/$(database)/documents/restaurants/{restaurantId}).data.ownerId == request.auth.uid;
-      allow delete: if request.auth != null && get(/databases/$(database)/documents/restaurants/{restaurantId}).data.ownerId == request.auth.uid;
+    
+    // Allow authenticated users to create their own orders
+    match /orders/{orderId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read, write: if request.auth != null && request.auth.token.email == resource.data.adminEmail;
     }
-
-    /**
-     * @description Grants public read access to dietary restriction information and restricts write access to authorized users.
-     * @path /dietary_restrictions/{dietaryRestrictionId}
-     * @allow get, list: if true;
-     * @allow create: if if request.auth != null; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Public read, owner-only writes.
-     */
-    match /dietary_restrictions/{dietaryRestrictionId} {
-      allow get, list: if true;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && request.auth.uid == resource.data.ownerId;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+    
+    // Allow users to read their own user document, and admin to read any.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.token.email == resource.data.adminEmail;
     }
-
-    /**
-     * @description Grants public read access to menu item dietary restriction relationships and restricts write access to authorized users.
-     * @path /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId}
-     * @allow get, list: if true;
-     * @allow create: if request.auth != null; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Public read, owner-only writes.
-     */
-    match /menu_item_dietary_restrictions/{menuItemDietaryRestrictionId} {
-      allow get, list: if true;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && request.auth.uid == resource.data.ownerId;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if request.auth != null && request.auth.token.email == resource.data.adminEmail;
     }
-
-    /**
-     * @description Grants access to user preferences only to the owning user.
-     * @path /users/{userId}/preferences/{userPreferenceId}
-     * @allow get, list: if isOwner(userId);
-     * @allow create: if isOwner(userId);
-     * @allow update: if isOwner(userId) && resource != null;
-     * @allow delete: if isOwner(userId) && resource != null;
-     * @deny get: if !isSignedIn();
-     * @deny list: if !isSignedIn();
-     * @deny create: if !isSignedIn();
-     * @deny update: if !isSignedIn();
-     * @deny delete: if !isSignedIn();
-     * @principle Enforces document ownership for all operations.
-     */
-    match /users/{userId}/preferences/{userPreferenceId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
-    }
-
-    /**
-     * @description Grants read access to reviews for anyone, and restricts write access to authenticated users.
-     * @path /restaurants/{restaurantId}/reviews/{reviewId}
-     * @allow get, list: if true;
-     * @allow create: if request.auth != null; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Public read, owner-only writes (inherited from restaurant).
-     */
-    match /restaurants/{restaurantId}/reviews/{reviewId} {
-      allow get, list: if true;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && request.auth.uid == resource.data.ownerId;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
-    }
-  }
-
-  // Helper function to determine if the user is signed in
-  function isSignedIn() {
-    return request.auth != null;
-  }
-
-  // Helper function to determine if the user is the owner
-  function isOwner(userId) {
-    return request.auth.uid == userId;
   }
 }
