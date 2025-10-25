@@ -23,7 +23,7 @@ export function AttributionBadge() {
     >
       <div className="relative h-7 w-7 flex-shrink-0">
         <Image
-          src="https://res.cloudinary.com/dpyireagy/image/upload/v1720516487/Screenshot_2024-07-09_at_1.34.12_PM_p85jnh.png"
+          src="https://res.cloudinary.com/dpyireagy/image/upload/v1721059441/user_pic.jpg"
           alt="Sami-e's profile picture"
           fill
           className="rounded-full object-cover"
