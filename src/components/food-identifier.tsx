@@ -277,7 +277,7 @@ export function FoodIdentifier() {
           <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-2">
               <BrainCircuit className="w-8 h-8 text-primary" />
-              <CardTitle className="text-3xl font-headline">AI Calorie Scanner</CardTitle>
+              <CardTitle className="text-3xl font-headline">Snap &amp; Scan Nutrition</CardTitle>
             </div>
             <CardDescription>
               Curious about your meal? Use your camera or upload a photo to get an AI-powered nutritional estimate.
@@ -320,7 +320,7 @@ export function FoodIdentifier() {
                   >
                     <Upload className="w-12 h-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">Upload Your Food Photo</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Drag & drop or click to browse (JPEG/PNG).</p>
+                    <p className="text-sm text-muted-foreground mb-4">Drag &amp; drop or click to browse (JPEG/PNG).</p>
                     <Button onClick={() => fileInputRef.current?.click()}>
                       Browse Files
                     </Button>
