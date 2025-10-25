@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Loader2, Eye, EyeOff, AlertTriangle, Info } from "lucide-react";
 import Link from "next/link";
 import { UtensilsCrossed } from "@/components/icons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,6 +25,9 @@ export default function SignInPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const auth = useAuth();
+    
+    const demoEmail = "demo@example.com";
+    const demoPassword = "password123";
 
     const handleSignIn = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,27 +44,37 @@ export default function SignInPage() {
         } catch (error: any) {
             console.error("Sign in error:", error);
             let errorMessage = "An unexpected error occurred. Please try again.";
-            switch (error.code) {
-                case 'auth/user-not-found':
-                case 'auth/wrong-password':
-                case 'auth/invalid-credential':
-                    errorMessage = "Invalid credentials. Please check your email and password and try again.";
-                    break;
-                case 'auth/invalid-email':
-                    errorMessage = "The email address you entered is not valid. Please check and try again.";
-                    break;
-                case 'auth/user-disabled':
-                    errorMessage = "This account has been disabled. Please contact support for assistance.";
-                    break;
-                 case 'auth/too-many-requests':
-                    errorMessage = "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.";
-                    break;
+            // A special user needs to be created for the demo in Firebase Auth
+            if (email === demoEmail && error.code === 'auth/user-not-found') {
+                errorMessage = "The demo account is not set up. Please sign up with this email and password first.";
+            } else {
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                    case 'auth/invalid-credential':
+                        errorMessage = "Invalid credentials. Please check your email and password and try again.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "The email address you entered is not valid. Please check and try again.";
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = "This account has been disabled. Please contact support for assistance.";
+                        break;
+                     case 'auth/too-many-requests':
+                        errorMessage = "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.";
+                        break;
+                }
             }
             setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
     };
+
+    const handleDemoLogin = () => {
+        setEmail(demoEmail);
+        setPassword(demoPassword);
+    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -88,6 +101,19 @@ export default function SignInPage() {
                                     <AlertDescription>{error}</AlertDescription>
                                 </Alert>
                             )}
+
+                             <Alert>
+                                <Info className="h-4 w-4" />
+                                <AlertTitle>Demo Account</AlertTitle>
+                                <AlertDescription>
+                                    <p>Email: <span className="font-semibold">{demoEmail}</span></p>
+                                    <p>Password: <span className="font-semibold">{demoPassword}</span></p>
+                                    <Button size="sm" variant="link" className="p-0 h-auto mt-2 text-primary" onClick={handleDemoLogin}>
+                                        Click here to use demo credentials
+                                    </Button>
+                                </AlertDescription>
+                            </Alert>
+
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
