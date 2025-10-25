@@ -10,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { identifyFoodItem, type IdentifyFoodItemOutput } from '@/ai/flows/identify-food-flow';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Upload, X, BrainCircuit, Flame, Utensils, AlertTriangle, Camera, Image as ImageIcon, Sparkles, User, FileUp, CreditCard, PlusCircle } from 'lucide-react';
+import { Upload, X, ScanLine, Flame, Utensils, AlertTriangle, Camera, Image as ImageIcon, Sparkles, User, FileUp, CreditCard, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -141,7 +141,7 @@ export function FoodIdentifier() {
       setImagePreview(result);
       handleIdentify(result);
     };
-    reader.readDataURL(file);
+    reader.readAsDataURL(file);
   }
 
   const handleCapture = () => {
@@ -276,7 +276,7 @@ export function FoodIdentifier() {
         <Card className="w-full mx-auto overflow-hidden">
           <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-2">
-              <BrainCircuit className="w-8 h-8 text-primary" />
+              <ScanLine className="w-8 h-8 text-primary" />
               <CardTitle className="text-3xl font-headline">Snap &amp; Scan Nutrition</CardTitle>
             </div>
             <CardDescription>
