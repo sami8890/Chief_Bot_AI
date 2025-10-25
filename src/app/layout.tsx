@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/context/cart-context';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { ThemeProvider } from 'next-themes';
+import { AttributionBadge } from '@/components/attribution-badge';
 
 
 export const metadata: Metadata = {
@@ -36,6 +37,7 @@ export default function RootLayout({
             </CartProvider>
           </FirebaseClientProvider>
         </ThemeProvider>
+        <AttributionBadge />
       </body>
     </html>
   );
