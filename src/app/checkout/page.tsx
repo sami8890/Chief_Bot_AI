@@ -45,7 +45,7 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
-function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
+function CheckoutForm({ clientSecret, paymentError }: { clientSecret: string | null, paymentError: string | null }) {
   const { user } = useUser();
   const { cart, clearCart } = useCart();
   const router = useRouter();
@@ -77,14 +77,16 @@ function CheckoutForm({ clientSecret }: { clientSecret: string | null }) {
 
 
   useEffect(() => {
-    if (paymentMethod === 'card' && isStripeConfigured && !clientSecret) {
+    if (paymentError) {
+      setMessage(paymentError);
+    } else if (paymentMethod === 'card' && isStripeConfigured && !clientSecret) {
       setMessage("Initializing payment... please wait.");
     } else if (paymentMethod === 'card' && !isStripeConfigured) {
         setMessage("Online payment is currently unavailable. Please select Cash on Delivery.")
     } else {
       setMessage(null);
     }
-  }, [paymentMethod, clientSecret, isStripeConfigured])
+  }, [paymentMethod, clientSecret, isStripeConfigured, paymentError])
 
 
   async function onSubmit(data: CheckoutFormValues) {
@@ -308,6 +310,7 @@ function CheckoutPageContents() {
   const router = useRouter();
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isLoadingSecret, setIsLoadingSecret] = useState(true);
   
   const isStripeConfigured = !!stripePromise;
@@ -330,13 +333,18 @@ function CheckoutPageContents() {
     if (isStripeConfigured && cart.length > 0 && total > 0.50) { // Stripe requires a minimum amount
       setIsLoadingSecret(true);
       createPaymentIntent(total)
-        .then(secret => {
-          if (secret) {
-            setClientSecret(secret);
+        .then(response => {
+          if (response.clientSecret) {
+            setClientSecret(response.clientSecret);
+          }
+          if (response.error) {
+            console.error("Failed to create payment intent", response.error);
+            setPaymentError(response.error);
           }
         })
         .catch(err => {
             console.error("Failed to create payment intent", err);
+            setPaymentError(err.message || "An unknown error occurred while setting up payment.");
         })
         .finally(() => {
             setIsLoadingSecret(false);
@@ -382,10 +390,10 @@ function CheckoutPageContents() {
         ) : (
             isStripeConfigured ? (
               <Elements stripe={stripePromise} options={options}>
-                <CheckoutForm clientSecret={clientSecret} />
+                <CheckoutForm clientSecret={clientSecret} paymentError={paymentError} />
               </Elements>
             ) : (
-               <CheckoutForm clientSecret={null} />
+               <CheckoutForm clientSecret={null} paymentError={paymentError} />
             )
         )}
       </main>

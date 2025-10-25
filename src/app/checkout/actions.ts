@@ -10,12 +10,13 @@ import type { CartItem } from '@/context/cart-context';
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
-export async function createPaymentIntent(amount: number) {
+export async function createPaymentIntent(amount: number): Promise<{clientSecret: string | null, error?: string}> {
   // Gracefully handle missing Stripe configuration
   if (!stripe) {
-    console.error("Stripe is not configured. Skipping payment intent creation.");
+    const errorMessage = "Stripe is not configured. Skipping payment intent creation.";
+    console.error(errorMessage);
     // Return a value that can be handled by the client
-    return null;
+    return { clientSecret: null, error: errorMessage };
   }
   
   try {
@@ -31,11 +32,12 @@ export async function createPaymentIntent(amount: number) {
         throw new Error('Failed to create payment intent: client_secret is null');
     }
 
-    return paymentIntent.client_secret;
-  } catch (error) {
-    console.error('Error creating PaymentIntent:', error);
-    // Propagate a more generic error to the client
-    throw new Error('Could not create payment intent.');
+    return { clientSecret: paymentIntent.client_secret };
+  } catch (error: any) {
+    const errorMessage = error.message || 'Could not create payment intent.';
+    console.error('Error creating PaymentIntent:', errorMessage);
+    // Propagate a more specific error to the client
+    return { clientSecret: null, error: `Payment gateway error: ${errorMessage}` };
   }
 }
 
