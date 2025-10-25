@@ -31,7 +31,7 @@ export function AttributionBadge() {
         />
       </div>
       <p className="tracking-wide">
-        Template by <span className="font-semibold">Sami-e</span>
+        by <span className="font-semibold">Sami-e</span>
       </p>
     </a>
   );
