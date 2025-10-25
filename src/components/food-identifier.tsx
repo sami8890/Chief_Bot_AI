@@ -25,6 +25,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 
 const SUPPORTED_MIME_TYPES = ['image/jpeg', 'image/png'];
 const MAX_FILE_SIZE_MB = 4;
@@ -238,29 +239,28 @@ export function FoodIdentifier() {
     if (isUserLoading || !user) return null;
     return (
         <Card className="mb-6">
-            <CardContent className="p-4 flex items-center justify-between">
+            <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <div className="flex items-center gap-3">
-                    <CreditCard className="w-6 h-6 text-primary"/>
+                    <CreditCard className="w-8 h-8 text-primary flex-shrink-0"/>
                     <div>
                         <p className="font-semibold">Scan Credits</p>
                         <p className="text-sm text-muted-foreground">Credits remaining for AI analysis</p>
                     </div>
                 </div>
                  {isUserDataLoading ? (
-                    <Skeleton className="h-8 w-24" />
+                    <Skeleton className="h-10 w-full sm:w-auto" />
                  ) : (
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={handleAddCredits}>
-                            <PlusCircle className="mr-2 h-4 w-4"/>
-                            Buy Credits
-                        </Button>
-                        <div className="text-right">
-                        {scanCredits !== null ? (
-                            <p className="text-2xl font-bold">{scanCredits}<span className="text-base font-normal text-muted-foreground">/10</span></p>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">N/A</p>
-                        )}
+                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                        <div className="flex-grow flex items-center justify-center sm:justify-end gap-4 w-full">
+                           <div className="text-center sm:text-right">
+                              <p className="text-3xl font-bold">{scanCredits ?? 0}<span className="text-lg font-normal text-muted-foreground">/10</span></p>
+                           </div>
+                           <Separator orientation="vertical" className="h-10 hidden sm:block"/>
                         </div>
+                        <Button variant="outline" size="lg" onClick={handleAddCredits} className="w-full sm:w-auto">
+                            <PlusCircle className="mr-2 h-4 w-4"/>
+                            Add Credits
+                        </Button>
                     </div>
                  )}
             </CardContent>
@@ -474,6 +474,10 @@ function AnalysisSkeleton() {
       </div>
     )
 }
+    
+
+    
+
     
 
     
