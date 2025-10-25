@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Loader2, Eye, EyeOff, AlertTriangle, Info } from "lucide-react";
 import Link from "next/link";
 import { UtensilsCrossed } from "@/components/icons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -104,6 +104,18 @@ export default function SignUpPage() {
                                     <AlertDescription>{error}</AlertDescription>
                                 </Alert>
                             )}
+
+                            <Alert>
+                                <Info className="h-4 w-4" />
+                                <AlertTitle>Want to try the demo?</AlertTitle>
+                                <AlertDescription>
+                                    <p>A demo account is available on the sign-in page.</p>
+                                    <Button size="sm" variant="link" className="p-0 h-auto mt-2 text-primary" asChild>
+                                        <Link href="/signin">Go to Sign In</Link>
+                                    </Button>
+                                </AlertDescription>
+                            </Alert>
+
                             <div className="space-y-2">
                                 <Label htmlFor="name">Name</Label>
                                 <Input id="name" type="text" placeholder="John Doe" required value={name} onChange={(e) => setName(e.target.value)} />
