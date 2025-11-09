@@ -18,13 +18,13 @@ export function Hero() {
           priority
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       <div className="relative z-10 flex flex-col items-center text-center p-4 animate-fade-in-up">
         
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 font-headline text-shadow-lg leading-tight">
-          Taste the Art of Fine Dining
+        <h1 className="text-6xl md:text-7xl font-bold tracking-tight mb-6 font-headline [text-shadow:0_4px_12px_rgba(0,0,0,0.8)] leading-tight">
+          Where Culinary Art Meets Tradition
         </h1>
-        <p className="text-lg md:text-xl max-w-2xl text-white/90 mb-10 text-shadow-md">
+        <p className="text-lg md:text-xl max-w-2xl text-white/90 mb-10 [text-shadow:0_2px_8px_rgba(0,0,0,0.7)]">
           An unforgettable culinary experience where every dish is a masterpiece.
         </p>
         <Button 
