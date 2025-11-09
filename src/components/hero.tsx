@@ -8,17 +8,11 @@ export function Hero() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'grilled-lamb-skewers');
 
   return (
-    <section id="hero" className="relative h-screen min-h-[700px] w-full flex items-center justify-center text-white overflow-hidden">
-      {heroImage && (
-        <Image
-          src={heroImage.imageUrl}
-          alt={heroImage.description}
-          fill
-          className="object-cover"
-          data-ai-hint={heroImage.imageHint}
-          priority
-        />
-      )}
+    <section 
+      id="hero" 
+      className="relative h-screen min-h-[700px] w-full flex items-center justify-center text-white overflow-hidden bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${heroImage?.imageUrl})` }}
+    >
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-black/30" />
       
       <div className="relative z-10 flex flex-col items-center text-center p-4 animate-fade-in-up max-w-4xl mx-auto">
