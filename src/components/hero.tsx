@@ -8,36 +8,32 @@ export function Hero() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'paella');
 
   return (
-    <section id="hero" className="bg-muted/30">
-      <div className="container mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center min-h-[calc(100vh-4rem)] py-12 md:py-20">
-        <div className="flex flex-col items-center md:items-start text-center md:text-left animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-sm font-medium text-primary bg-primary/10 border border-primary/20 rounded-full">
-            <Sparkles className="w-4 h-4" />
+    <section id="hero" className="relative h-[calc(100vh-4rem)] min-h-[500px] w-full flex items-center justify-center text-white">
+      {heroImage && (
+        <Image
+          src={heroImage.imageUrl}
+          alt={heroImage.description}
+          fill
+          className="object-cover"
+          data-ai-hint={heroImage.imageHint}
+          priority
+        />
+      )}
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="relative z-10 flex flex-col items-center text-center p-4 animate-fade-in-up">
+        <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-sm font-medium bg-white/10 border border-white/20 rounded-full">
+            <Sparkles className="w-4 h-4 text-yellow-300" />
             <span>AI-Powered Dining</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 font-headline text-foreground">
-            Discover Your Next Favorite Meal, Intelligently.
-          </h1>
-          <p className="text-lg md:text-xl max-w-xl text-muted-foreground mb-8">
-            ChefBot analyzes menus, understands your tastes, and even identifies food from a photo. Say goodbye to menu guesswork and hello to personalized dining.
-          </p>
-          <Button size="lg" className="text-lg h-12" asChild>
-            <Link href="/#main-content">Explore The Menu</Link>
-          </Button>
         </div>
-        <div className="relative w-full h-80 md:h-auto md:aspect-[4/3] animate-fade-in-up [animation-delay:200ms]">
-          {heroImage && (
-             <Image
-              src={heroImage.imageUrl}
-              alt={heroImage.description}
-              fill
-              className="object-cover rounded-2xl shadow-lg border-4 border-background"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              data-ai-hint={heroImage.imageHint}
-              priority
-            />
-          )}
-        </div>
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 font-headline text-shadow-lg">
+          Discover Your Next Favorite Meal, Intelligently.
+        </h1>
+        <p className="text-lg md:text-xl max-w-2xl text-white/90 mb-8 text-shadow-md">
+          ChefBot analyzes menus, understands your tastes, and even identifies food from a photo. Say goodbye to menu guesswork and hello to personalized dining.
+        </p>
+        <Button size="lg" className="text-lg h-12 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transition-transform duration-300 hover:scale-105" asChild>
+          <Link href="/#main-content">Explore The Menu</Link>
+        </Button>
       </div>
     </section>
   );
