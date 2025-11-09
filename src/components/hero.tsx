@@ -2,13 +2,12 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
 
 export function Hero() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'paella');
+  const heroImage = PlaceHolderImages.find(p => p.id === 'fine-dining-dish');
 
   return (
-    <section id="hero" className="relative h-[calc(100vh-4rem)] min-h-[500px] w-full flex items-center justify-center text-white">
+    <section id="hero" className="relative h-screen min-h-[700px] w-full flex items-center justify-center text-white">
       {heroImage && (
         <Image
           src={heroImage.imageUrl}
@@ -19,20 +18,21 @@ export function Hero() {
           priority
         />
       )}
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
       <div className="relative z-10 flex flex-col items-center text-center p-4 animate-fade-in-up">
-        <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-sm font-medium bg-white/10 border border-white/20 rounded-full">
-            <Sparkles className="w-4 h-4 text-yellow-300" />
-            <span>AI-Powered Dining</span>
-        </div>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 font-headline text-shadow-lg">
-          Discover Your Next Favorite Meal, Intelligently.
+        
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 font-headline text-shadow-lg leading-tight">
+          Taste the Art of Fine Dining
         </h1>
-        <p className="text-lg md:text-xl max-w-2xl text-white/90 mb-8 text-shadow-md">
-          ChefBot analyzes menus, understands your tastes, and even identifies food from a photo. Say goodbye to menu guesswork and hello to personalized dining.
+        <p className="text-lg md:text-xl max-w-2xl text-white/90 mb-10 text-shadow-md">
+          An unforgettable culinary experience where every dish is a masterpiece.
         </p>
-        <Button size="lg" className="text-lg h-12 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transition-transform duration-300 hover:scale-105" asChild>
-          <Link href="/#main-content">Explore The Menu</Link>
+        <Button 
+            size="lg" 
+            className="text-lg h-14 bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-400/50" 
+            asChild
+        >
+          <Link href="/#menu">Reserve a Table</Link>
         </Button>
       </div>
     </section>

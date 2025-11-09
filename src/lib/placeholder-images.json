@@ -1,10 +1,10 @@
 {
   "placeholderImages": [
     {
-      "id": "hero-image",
-      "description": "A beautiful restaurant interior with warm lighting.",
-      "imageUrl": "https://images.unsplash.com/photo-1538333581680-29dd4752ddf2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzU5MTQwMTU2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "restaurant interior"
+      "id": "fine-dining-dish",
+      "description": "A beautifully plated fine dining dish with intricate details, under warm, dramatic lighting.",
+      "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=1980&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "fine dining"
     },
     {
       "id": "bruschetta",
@@ -27,7 +27,7 @@
     {
       "id": "mushroom-risotto",
       "description": "Creamy mushroom risotto in a rustic plate, topped with parmesan.",
-      "imageUrl": "https://images.unsplash.com/photo-1595908129746-57ca1a63dd4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtdXNocm9vbSUyMHJpc290dG98ZW58MHx8fHwxNzU5MTg4MzU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1595908129746-57ca1a63dd4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtdXNocm9vbSUyMHJpc290dG98ZW58MHx8fHwxNzU5MTg4MzU4fDA&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "mushroom risotto"
     },
     {
@@ -39,73 +39,73 @@
     {
       "id": "ribeye-steak",
       "description": "A perfectly grilled ribeye steak sliced on a cutting board.",
-      "imageUrl": "https://images.unsplash.com/photo-1657143378324-83c1609f32a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Z3JpbGxlZCUyMHN0ZWFrfGVufDB8fHx8MTc1OTE2NjQ4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1657143378324-83c1609f32a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Z3JpbGxlZCUyMHN0ZWFrfGVufDB8fHx8MTc1OTE2NjQ4OHww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "grilled steak"
     },
     {
       "id": "lava-cake",
       "description": "A chocolate lava cake with a molten center and a scoop of ice cream.",
-      "imageUrl": "https://images.unsplash.com/photo-1517427294546-5aa121f68e8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaG9jb2xhdGUlMjBjYWtlfGVufDB8fHx8MTc1OTEzNzc5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1517427294546-5aa121f68e8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaG9jb2xhdGUlMjBjYWtlfGVufDB8fHx8MTc1OTEzNzc5Nnww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "chocolate cake"
     },
     {
       "id": "avocado-toast",
       "description": "Avocado toast on a plate, topped with seeds and spices.",
-      "imageUrl": "https://images.unsplash.com/photo-1650092194571-d3c1534562be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhdm9jYWRvJTIwdG9hc3R8ZW58MHx8fHwxNzU5MTY1MzE1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1650092194571-d3c1534562be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhdm9jYWRvJTIwdG9hc3R8ZW58MHx8fHwxNzU5MTY1MzE1fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "avocado toast"
     },
     {
       "id": "scallops",
       "description": "Pan-seared scallops with a golden crust.",
-      "imageUrl": "https://images.unsplash.com/photo-1601842929683-7d8755387735?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZWFyZWQlMjBzY2FsbG9wc3xlbnwwfHx8fDE3NTkxNDI5NzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1601842929683-7d8755387735?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZWFyZWQlMjBzY2FsbG9wc3xlbnwwfHx8fDE3NTkxNDI5NzJ8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "seared scallops"
     },
     {
       "id": "duck-confit",
       "description": "Crispy duck confit on a white plate.",
-      "imageUrl": "https://images.unsplash.com/photo-1699619669074-ba15a109b962?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxkdWNrJTIwY29uZml0fGVufDB8fHx8MTc1OTA5NjE5Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1699619669074-ba15a109b962?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxkdWNrJTIwY29uZml0fGVufDB8fHx8MTc1OTA5NjE5Mnww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "duck confit"
     },
     {
       "id": "tiramisu",
       "description": "A slice of tiramisu on a dessert plate.",
-      "imageUrl": "https://images.unsplash.com/photo-1649088309259-6eba50c151b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0aXJhbWlzdSUyMHNsaWNlfGVufDB8fHx8MTc1OTE5Nzc1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1649088309259-6eba50c151b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0aXJhbWlzdSUyMHNsaWNlfGVufDB8fHx8MTc1OTE5Nzc1N3ww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "tiramisu slice"
     },
     {
       "id": "gallery-1",
       "description": "A chef plating a dish.",
-      "imageUrl": "https://images.unsplash.com/photo-1675092975393-7b7cd0c618fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaGVmJTIwcGxhdGluZ3xlbnwwfHx8fDE3NTkxNjU2NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1675092975393-7b7cd0c618fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaGVmJTIwcGxhdGluZ3xlbnwwfHx8fDE3NTkxNjU2NDR8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "chef plating"
     },
     {
       "id": "gallery-2",
       "description": "A close-up of a colorful cocktail.",
-      "imageUrl": "https://images.unsplash.com/photo-1681579289862-42080bf4509a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjb2xvcmZ1bCUyMGNvY2t0YWlsfGVufDB8fHx8MTc1OTE5Nzc1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1681579289862-42080bf4509a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjb2xvcmZ1bCUyMGNvY2t0YWlsfGVufDB8fHx8MTc1OTE5Nzc1OHww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "colorful cocktail"
     },
     {
       "id": "gallery-3",
       "description": "An overhead shot of a table with multiple dishes.",
-      "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZXN0YXVyYW50JTIwdGFibGV8ZW58MHx8fHwxNzU5MTYxMzI2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZXN0YXVyYW50JTIwdGFibGV8ZW58MHx8fHwxNzU5MTYxMzI2fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "restaurant table"
     },
     {
       "id": "gallery-4",
       "description": "The exterior of the restaurant at dusk.",
-      "imageUrl": "https://images.unsplash.com/photo-1672154008766-7e95321fb845?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwZXh0ZXJpb3J8ZW58MHx8fHwxNzU5MDkzMjQ3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1672154008766-7e95321fb845?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwZXh0ZXJpb3J8ZW58MHx8fHwxNzU5MDkzMjQ3fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "restaurant exterior"
     },
     {
       "id": "gallery-5",
       "description": "A happy group of friends dining.",
-      "imageUrl": "https://images.unsplash.com/photo-1662428311456-94671229489f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmcmllbmRzJTIwZGluaW5nfGVufDB8fHx8MTc1OTA5NjA3Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1662428311456-94671229489f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmcmllbmRzJTIwZGluaW5nfGVufDB8fHx8MTc1OTA5NjA3Mnww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "friends dining"
     },
     {
       "id": "gallery-6",
       "description": "A beautifully decorated dessert.",
-      "imageUrl": "https://images.unsplash.com/photo-1667780905058-87fc5995ed6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmYW5jeSUyMGRlc3NlcnR8ZW58MHx8fHwxNzU5MTk3NzU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1667780905058-87fc5995ed6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmYW5jeSUyMGRlc3NlcnR8ZW58MHx8fHwxNzU5MTk3NzU4fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "fancy dessert"
     },
     {
