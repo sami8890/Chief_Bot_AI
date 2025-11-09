@@ -87,4 +87,22 @@ export const galleryImageIds: string[] = [
   'gallery-6',
 ];
 
+export const testimonials: Testimonial[] = [
+  {
+    quote: "The food was absolutely wonderful, from preparation to presentation, very pleasing. We especially enjoyed the special bar drinks, the cucumber/cilantro infused vodka martini was great (even took photos so we could try to replicate at home).",
+    author: "Aisha R."
+  },
+  {
+    quote: "This is my absolute favorite restaurant. The food is always fantastic and no matter what I order I am always delighted with my meal! Servers are also great and always efficient, happy and polite. Can’t wait to return and wouldn’t hesitate to recommend to anyone looking for somewhere to eat.",
+    author: "Omar K."
+  },
+  {
+    quote: "Excellent food. Menu is extensive and seasonal to a particularly high standard. Definitely fine dining. It can be expensive but worth it and they do different deals on different nights so it’s worth checking them out before you book. Highly recommended.",
+    author: "Fatima S."
+  },
+   {
+    quote: "This place is great! Atmosphere is chill and cool but the staff is also really friendly. They know what they’re doing and what they’re talking about, and you can tell making the customers happy is their main priority. Food is pretty good, some classics and some twists, and for their prices it’s 100% worth it.",
+    author: "Yusuf A."
+  }
+];
     
