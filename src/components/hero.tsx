@@ -9,14 +9,10 @@ export function Hero() {
   return (
     <section id="hero" className="relative h-screen w-full flex items-center justify-center text-center text-white overflow-hidden">
       {heroImage && (
-        <Image
+        <img
           src='https://i.ibb.co/6yv6YcZ/photo-1555396273-367ea4eb4db5-q-80-w-1974-auto-format-fit-crop-ixlib-rb-4-0.jpg'
           alt={heroImage.description}
-          layout="fill"
-          objectFit="cover"
-          className="object-cover"
-          data-ai-hint={heroImage.imageHint}
-          priority
+          className="absolute inset-0 w-full h-full object-cover -z-10"
         />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent" />
