@@ -8,3 +8,13 @@ export function UtensilsCrossed(props: React.SVGProps<SVGSVGElement>) {
         </svg>
     )
 }
+
+export function IslamicGeometric(props: React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M50 0 L100 50 L50 100 L0 50 Z" />
+            <path d="M25 25 L75 25 L75 75 L25 75 Z" />
+            <circle cx="50" cy="50" r="15" />
+        </svg>
+    )
+}
