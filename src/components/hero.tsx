@@ -2,30 +2,42 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 
 export function Hero() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'hero-image');
+  const heroImage = PlaceHolderImages.find(p => p.id === 'paella');
 
   return (
-    <section id="hero" className="relative h-screen w-full flex items-center justify-center text-center text-white overflow-hidden">
-      {heroImage && (
-        <img
-          src='https://i.ibb.co/6yv6YcZ/photo-1555396273-367ea4eb4db5-q-80-w-1974-auto-format-fit-crop-ixlib-rb-4-0.jpg'
-          alt={heroImage.description}
-          className="absolute inset-0 w-full h-full object-cover -z-10"
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent" />
-      <div className="relative z-10 p-4 animate-fade-in-up">
-        <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 font-headline" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
-          Experience Culinary Excellence
-        </h2>
-        <p className="text-lg md:text-xl max-w-3xl mx-auto" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.7)' }}>
-          Discover a symphony of flavors crafted with passion and the finest ingredients.
-        </p>
-        <Button size="lg" className="mt-8" asChild>
-          <Link href="/#main-content">Explore The Menu</Link>
-        </Button>
+    <section id="hero" className="bg-muted/30">
+      <div className="container mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center min-h-[calc(100vh-4rem)] py-12 md:py-20">
+        <div className="flex flex-col items-center md:items-start text-center md:text-left animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-sm font-medium text-primary bg-primary/10 border border-primary/20 rounded-full">
+            <Sparkles className="w-4 h-4" />
+            <span>AI-Powered Dining</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 font-headline text-foreground">
+            Discover Your Next Favorite Meal, Intelligently.
+          </h1>
+          <p className="text-lg md:text-xl max-w-xl text-muted-foreground mb-8">
+            ChefBot analyzes menus, understands your tastes, and even identifies food from a photo. Say goodbye to menu guesswork and hello to personalized dining.
+          </p>
+          <Button size="lg" className="text-lg h-12" asChild>
+            <Link href="/#main-content">Explore The Menu</Link>
+          </Button>
+        </div>
+        <div className="relative w-full h-80 md:h-auto md:aspect-[4/3] animate-fade-in-up [animation-delay:200ms]">
+          {heroImage && (
+             <Image
+              src={heroImage.imageUrl}
+              alt={heroImage.description}
+              fill
+              className="object-cover rounded-2xl shadow-lg border-4 border-background"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              data-ai-hint={heroImage.imageHint}
+              priority
+            />
+          )}
+        </div>
       </div>
     </section>
   );
