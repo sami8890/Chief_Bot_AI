@@ -2,45 +2,35 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
-import { IslamicGeometric } from './icons';
 
 export function Hero() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'grilled-lamb-skewers');
+  const heroImage = PlaceHolderImages.find(p => p.id === 'brunch-spread');
 
   return (
     <section 
       id="hero" 
-      className="relative h-screen min-h-[700px] w-full flex items-center justify-center text-white overflow-hidden bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${heroImage?.imageUrl})` }}
+      className="container mx-auto px-4 py-12 md:py-24"
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-black/30" />
-      
-      <div className="relative z-10 flex flex-col items-center text-center p-4 animate-fade-in-up max-w-4xl mx-auto">
-        
-        <div className="relative border-2 border-amber-400/50 p-8 rounded-lg backdrop-blur-sm bg-black/30">
-          <IslamicGeometric className="absolute top-0 left-0 w-16 h-16 text-amber-400/60 -translate-x-1/3 -translate-y-1/3" />
-          <IslamicGeometric className="absolute top-0 right-0 w-16 h-16 text-amber-400/60 translate-x-1/3 -translate-y-1/3" />
-          <IslamicGeometric className="absolute bottom-0 left-0 w-16 h-16 text-amber-400/60 -translate-x-1/3 translate-y-1/3" />
-          <IslamicGeometric className="absolute bottom-0 right-0 w-16 h-16 text-amber-400/60 translate-x-1/3 translate-y-1/3" />
-
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-4 font-headline text-white [text-shadow:0_3px_10px_rgba(0,0,0,0.7)]">
-            Experience the Essence of Halal Fine Dining
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="flex flex-col items-start text-left animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 font-headline text-foreground">
+            Wholesome Halal Flavors, Fresh Every Morning
           </h1>
-          <p className="text-lg md:text-xl max-w-2xl text-white/90 mb-8 [text-shadow:0_2px_8px_rgba(0,0,0,0.7)]">
-            Crafted with purity, tradition, and passion — where every bite tells a story.
+          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg">
+            Enjoy locally sourced, ethically prepared halal meals made with love.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-start gap-4">
             <Button 
                 size="lg" 
-                className="text-lg h-14 w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-400/50" 
+                className="text-lg h-14 w-full sm:w-auto transition-all duration-300 hover:scale-105" 
                 asChild
             >
-              <Link href="/#menu">Reserve a Table</Link>
+              <Link href="/#menu">Order Online</Link>
             </Button>
             <Button 
                 size="lg"
                 variant="outline"
-                className="text-lg h-14 w-full sm:w-auto bg-transparent border-2 border-white text-white hover:bg-white hover:text-black transition-all duration-300"
+                className="text-lg h-14 w-full sm:w-auto transition-all duration-300 hover:bg-secondary"
                 asChild
             >
                 <Link href="/#menu">View Menu</Link>
@@ -48,6 +38,17 @@ export function Hero() {
           </div>
         </div>
 
+        <div className="relative w-full h-80 md:h-full min-h-[300px] md:min-h-[500px] animate-fade-in-up [animation-delay:200ms]">
+          {heroImage && (
+            <Image
+              src={heroImage.imageUrl}
+              alt={heroImage.description}
+              fill
+              className="object-cover rounded-lg shadow-lg"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          )}
+        </div>
       </div>
     </section>
   );

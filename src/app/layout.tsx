@@ -5,16 +5,16 @@ import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/context/cart-context';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { ThemeProvider } from 'next-themes';
-import { Playfair_Display, PT_Sans } from 'next/font/google';
+import { Poppins, Nunito_Sans } from 'next/font/google';
 import { cn } from '@/lib/utils';
 
-const playfairDisplay = Playfair_Display({
+const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['700'],
+  weight: ['600', '700'],
   variable: '--font-headline',
 });
 
-const ptSans = PT_Sans({
+const nunitoSans = Nunito_Sans({
   subsets: ['latin'],
   weight: ['400', '700'],
   style: ['normal', 'italic'],
@@ -32,9 +32,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={cn("font-body antialiased", playfairDisplay.variable, ptSans.variable)}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn("font-body antialiased", poppins.variable, nunitoSans.variable)}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <FirebaseClientProvider>
             <CartProvider>
               {children}

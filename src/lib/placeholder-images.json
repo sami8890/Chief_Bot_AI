@@ -1,10 +1,10 @@
 {
   "placeholderImages": [
     {
-      "id": "grilled-lamb-skewers",
-      "description": "Close-up of beautifully grilled lamb skewers on a dark plate, garnished with herbs, with a warm, moody background.",
-      "imageUrl": "https://images.unsplash.com/photo-1599458342799-2a78107a4192?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "imageHint": "grilled lamb"
+      "id": "brunch-spread",
+      "description": "A bright and airy shot of a brunch spread including pastries, tea, and fresh fruit.",
+      "imageUrl": "https://images.unsplash.com/photo-1543637136-3df95217a419?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "brunch spread"
     },
     {
       "id": "bruschetta",
@@ -21,7 +21,7 @@
     {
       "id": "lentil-soup",
       "description": "A bowl of red lentil soup, garnished with fresh herbs.",
-      "imageUrl": "https://images.unsplash.com/photo-1605909388460-74ec8b204127?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxsZW50aWwlMjBzb3VwfGVufDB8fHx8MTc1OTE1NjkyNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1605909388460-74ec8b204127?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxsZW50aWwlMjBzb3VwfGVufDB8fHx8fDE3NTkxNTY5MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "lentil soup"
     },
     {
@@ -69,7 +69,7 @@
     {
       "id": "tiramisu",
       "description": "A slice of tiramisu on a dessert plate.",
-      "imageUrl": "https://images.unsplash.com/photo-1649088309259-6eba50c151b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0aXJhbWlzdSUyMHNsaWNlfGVufDB8fHx8MTc1OTE5Nzc1N3ww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1649088309259-6eba50c151b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0aXJhbWlzdSUyMHNsaWNlfGVufDB8fHx8MTc1OTE5Nzc1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "tiramisu slice"
     },
     {
@@ -87,13 +87,13 @@
     {
       "id": "gallery-3",
       "description": "An overhead shot of a table with multiple dishes.",
-      "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZXN0YXVyYW50JTIwdGFibGV8ZW58MHx8fHwxNzU5MTYxMzI2fDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZXN0YXVyYW50JTIwdGFibGV8ZW58MHx8fHwxNzU5MTYxMzI2fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "restaurant table"
     },
     {
       "id": "gallery-4",
       "description": "The exterior of the restaurant at dusk.",
-      "imageUrl": "https://images.unsplash.com/photo-1672154008766-7e95321fb845?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwZXh0ZXJpb3J8ZW58MHx8fHwxNzU5MDkzMjQ3fDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1672154008766-7e95321fb845?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwZXh0ZXJpb3J8ZW58MHx8fHwxNzU5MDkzMjQ3fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "restaurant exterior"
     },
     {
@@ -123,7 +123,7 @@
     {
       "id": "burger-fries",
       "description": "Burger and Fries",
-      "imageUrl": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1998&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageUrl": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1998&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%D3D",
       "imageHint": "burger fries"
     }
   ]
