@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -46,6 +47,7 @@ export function Hero() {
               fill
               className="object-cover rounded-lg shadow-lg"
               sizes="(max-width: 768px) 100vw, 50vw"
+              priority
             />
           )}
         </div>
