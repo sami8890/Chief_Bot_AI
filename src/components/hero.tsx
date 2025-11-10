@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -31,7 +32,7 @@ export function Hero() {
           <IslamicGeometric className="absolute bottom-0 right-0 w-16 h-16 text-amber-400/60 translate-x-1/3 translate-y-1/3" />
 
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-4 font-headline text-white [text-shadow:0_3px_10px_rgba(0,0,0,0.7)]">
-            Modern halal dining for every moment
+            A Symphony of Spice & Soul
           </h1>
           <p className="text-lg md:text-xl max-w-2xl text-white/90 mb-8 [text-shadow:0_2px_8px_rgba(0,0,0,0.7)]">
             Crafted with purity, tradition, and passion — where every bite tells a story.
