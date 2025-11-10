@@ -13,6 +13,12 @@
       "imageHint": "luxury restaurant"
     },
     {
+      "id": "floating-kebab",
+      "description": "Beautifully arranged plate of grilled kebabs with rice and salad, on a transparent background.",
+      "imageUrl": "https://i.ibb.co/bFz8fD0/kebab-plate-no-bg.png",
+      "imageHint": "kebab plate"
+    },
+    {
       "id": "bruschetta",
       "description": "Close-up of three pieces of bruschetta on a wooden board.",
       "imageUrl": "https://images.unsplash.com/photo-1630230596944-6373069c837d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxicnVzY2hldHRhJTIwdG9tYXRvZXN8ZW58MHx8fHwxNzU5MTUwMDA3fDA&ixlib=rb-4.1.0&q=80&w=1080",
