@@ -41,7 +41,7 @@ export function Hero() {
                 className="text-lg h-14 w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-400/50" 
                 asChild
             >
-              <Link href="/#menu">Reserve a Table</Link>
+              <Link href="/#food-identifier">Scan calariees</Link>
             </Button>
             <Button 
                 size="lg"
