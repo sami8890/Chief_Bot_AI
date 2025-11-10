@@ -5,19 +5,18 @@ import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/context/cart-context';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { ThemeProvider } from 'next-themes';
-import { Poppins, Nunito_Sans } from 'next/font/google';
+import { Playfair_Display, Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 
-const poppins = Poppins({
+const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
-  weight: ['600', '700'],
+  weight: ['400', '700', '900'],
   variable: '--font-headline',
 });
 
-const nunitoSans = Nunito_Sans({
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '700'],
-  style: ['normal', 'italic'],
+  weight: ['300', '400', '600', '700'],
   variable: '--font-body',
 });
 
@@ -33,8 +32,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("font-body antialiased", poppins.variable, nunitoSans.variable)}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <body className={cn("font-body antialiased", playfairDisplay.variable, inter.variable)}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <FirebaseClientProvider>
             <CartProvider>
               {children}
