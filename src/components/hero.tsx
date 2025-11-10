@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
 import { IslamicGeometric } from './icons';
+import { ScanLine, BookOpen } from 'lucide-react';
 
 export function Hero() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'grilled-lamb-skewers');
@@ -41,7 +42,10 @@ export function Hero() {
                 className="text-lg h-14 w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-400/50" 
                 asChild
             >
-              <Link href="/#food-identifier">Scan calariees</Link>
+              <Link href="/#food-identifier">
+                <ScanLine className="mr-2 h-6 w-6" />
+                Scan calariees
+              </Link>
             </Button>
             <Button 
                 size="lg"
@@ -49,7 +53,10 @@ export function Hero() {
                 className="text-lg h-14 w-full sm:w-auto bg-transparent border-2 border-white text-white hover:bg-white hover:text-black transition-all duration-300"
                 asChild
             >
-                <Link href="/#menu">View Menu</Link>
+                <Link href="/#menu">
+                  <BookOpen className="mr-2 h-6 w-6" />
+                  View Menu
+                </Link>
             </Button>
           </div>
         </div>
