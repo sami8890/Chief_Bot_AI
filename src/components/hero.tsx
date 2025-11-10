@@ -54,6 +54,7 @@ export function Hero() {
             className="object-cover"
             priority
             quality={90}
+            data-ai-hint={heroImage.imageHint}
           />
         </div>
       )}
@@ -73,6 +74,7 @@ export function Hero() {
                 fill
                 className="object-contain"
                 quality={100}
+                data-ai-hint={floatingDishImage.imageHint}
               />
             </div>
           </div>
@@ -80,7 +82,7 @@ export function Hero() {
 
         <div className="relative z-20 flex flex-col items-center justify-center">
             <div 
-                className="font-headline text-5xl md:text-7xl lg:text-8xl font-bold text-white mix-blend-overlay"
+                className="font-headline text-5xl md:text-7xl lg:text-8xl font-bold text-white"
                 style={{ textShadow: '2px 2px 20px rgba(0,0,0,0.5)' }}
             >
                 <span className="block opacity-0 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>Artistry</span>
