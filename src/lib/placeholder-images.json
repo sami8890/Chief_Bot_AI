@@ -7,10 +7,10 @@
       "imageHint": "brunch spread"
     },
     {
-      "id": "grilled-kebab-spread",
-      "description": "A beautiful spread of grilled kebabs and other dishes.",
-      "imageUrl": "https://images.unsplash.com/photo-1606843048512-4c91b5a5b5a8?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "imageHint": "grilled kebabs"
+      "id": "grilled-lamb-skewers",
+      "description": "Succulent grilled lamb skewers with herbs and spices, presented elegantly.",
+      "imageUrl": "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "imageHint": "grilled lamb"
     },
     {
       "id": "luxury-interior",
