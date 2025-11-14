@@ -10,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { identifyFoodItem, type IdentifyFoodItemOutput } from '@/ai/flows/identify-food-flow';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Upload, X, ScanLine, Flame, Utensils, AlertTriangle, Camera, Image as ImageIcon, Sparkles, User, FileUp, CreditCard, PlusCircle } from 'lucide-react';
+import { Upload, X, ScanLine, Flame, Utensils, AlertTriangle, Camera, Image as ImageIcon, Sparkles, User, FileUp, CreditCard, PlusCircle, Frown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -36,7 +36,7 @@ export function FoodIdentifier() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<IdentifyFoodItemOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ title: string; message: string } | null>(null);
   const [mode, setMode] = useState<'upload' | 'webcam'>('upload');
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -77,7 +77,7 @@ export function FoodIdentifier() {
 
   const getCameraPermission = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setError("Webcam is not supported by your browser.");
+        setError({ title: "Unsupported Browser", message: "Webcam is not supported by your browser." });
         setHasCameraPermission(false);
         return;
       }
@@ -127,12 +127,12 @@ export function FoodIdentifier() {
     setAnalysis(null);
 
     if (!SUPPORTED_MIME_TYPES.includes(file.type)) {
-      setError('Invalid file type. Please upload a JPEG or PNG image.');
+      setError({ title: "Invalid File Type", message: 'Please upload a JPEG or PNG image.' });
       return;
     }
 
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      setError(`Image is too large. Please upload an image smaller than ${MAX_FILE_SIZE_MB}MB.`);
+      setError({ title: "Image Too Large", message: `Please upload an image smaller than ${MAX_FILE_SIZE_MB}MB.` });
       return;
     }
 
@@ -173,7 +173,10 @@ export function FoodIdentifier() {
     try {
       const result = await identifyFoodItem({ photoDataUri: imageDataUri });
       if (!result.isFood) {
-        setError("That's an interesting object! But it doesn't look like food to me. Try another angle or a different item.");
+        setError({
+          title: "Couldn't see that clearly",
+          message: "This doesn't look like food to our AI. Try a different photo or a clearer angle."
+        });
       } else {
         setAnalysis(result);
         const userRef = doc(firestore, "users", user.uid);
@@ -182,7 +185,10 @@ export function FoodIdentifier() {
         });
       }
     } catch (e) {
-      setError('Failed to analyze the image. Please try again later.');
+      setError({
+        title: "Analysis Error",
+        message: 'The AI failed to analyze the image. Please try again with a different photo.'
+      });
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -357,14 +363,17 @@ export function FoodIdentifier() {
               </div>
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-center md:text-left font-headline">Nutritional Analysis</h3>
-                {error && (
-                  <Alert variant="destructive" className="mt-4">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Analysis Failed</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+
                 {isLoading && <AnalysisSkeleton />}
+                
+                {!isLoading && error && (
+                   <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-destructive/30 rounded-lg aspect-video bg-destructive/5">
+                      <Frown className="w-12 h-12 text-destructive mb-4" />
+                      <h3 className="text-lg font-semibold mb-2 text-destructive-foreground">{error.title}</h3>
+                      <p className="text-sm text-destructive-foreground/80">{error.message}</p>
+                   </div>
+                )}
+                
                 {!isLoading && !analysis && !error && (
                   <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-muted-foreground/30 rounded-lg aspect-video">
                     <Sparkles className="w-12 h-12 text-muted-foreground mb-4" />
@@ -372,6 +381,7 @@ export function FoodIdentifier() {
                     <p className="text-sm text-muted-foreground">Your food analysis will appear here.</p>
                   </div>
                 )}
+
                 {analysis && (
                   <div className="p-4 bg-muted/50 rounded-lg border space-y-4">
                       <div className="flex items-center gap-4">
@@ -474,5 +484,3 @@ function AnalysisSkeleton() {
       </div>
     )
 }
-
-    
