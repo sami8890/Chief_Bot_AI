@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
-import { IslamicGeometric } from './icons';
 import { ScanLine, BookOpen } from 'lucide-react';
 
 export function Hero() {
@@ -34,7 +33,7 @@ export function Hero() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button 
               size="lg" 
-              className="text-lg h-14 w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-400/50" 
+              className="text-lg h-14 w-full sm:w-auto bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/50" 
               asChild
           >
             <Link href="/#food-identifier">
